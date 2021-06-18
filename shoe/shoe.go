@@ -34,12 +34,9 @@ func eightdecks(c chan *deck.Deck) {
 	go deck.Create(c)
 	go deck.Create(c)
 
-	//output <- <-c, <-c, <-c, <-c, <-c, <-c, <-c, <-c
-
 }
 
-func defaultdecks(output chan *deck.Deck) {
-	c := make(chan *deck.Deck)
+func defaultdecks(c chan *deck.Deck) {
 
 	go deck.Create(c)
 	go deck.Create(c)
@@ -47,7 +44,6 @@ func defaultdecks(output chan *deck.Deck) {
 	go deck.Create(c)
 	go deck.Create(c)
 
-	//output <- <-c, <-c, <-c, <-c, <-c
 }
 
 func Create(total int) *Shoe {
@@ -70,8 +66,23 @@ func Create(total int) *Shoe {
 		shoe.Cards = append(shoe.Cards, q.Cards...)
 	case 8:
 		eightdecks(c)
+		x, y, z, q, r, s, t, v := <-c, <-c, <-c, <-c, <-c, <-c, <-c, <-c
+		shoe.Cards = append(shoe.Cards, x.Cards...)
+		shoe.Cards = append(shoe.Cards, y.Cards...)
+		shoe.Cards = append(shoe.Cards, z.Cards...)
+		shoe.Cards = append(shoe.Cards, q.Cards...)
+		shoe.Cards = append(shoe.Cards, r.Cards...)
+		shoe.Cards = append(shoe.Cards, s.Cards...)
+		shoe.Cards = append(shoe.Cards, t.Cards...)
+		shoe.Cards = append(shoe.Cards, v.Cards...)
 	default:
 		defaultdecks(c)
+		x, y, z, q, r := <-c, <-c, <-c, <-c, <-c
+		shoe.Cards = append(shoe.Cards, x.Cards...)
+		shoe.Cards = append(shoe.Cards, y.Cards...)
+		shoe.Cards = append(shoe.Cards, z.Cards...)
+		shoe.Cards = append(shoe.Cards, q.Cards...)
+		shoe.Cards = append(shoe.Cards, r.Cards...)
 	}
 
 	return &shoe

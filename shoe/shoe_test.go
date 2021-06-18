@@ -27,3 +27,11 @@ func TestCreateShoe8(t *testing.T) {
 	}
 
 }
+
+func TestCreateShoeDefault(t *testing.T) {
+	var shoe = Create(100)
+	if len(shoe.Cards) != (52 * 5) {
+		t.Fatalf("length is incorrect")
+	}
+
+}
