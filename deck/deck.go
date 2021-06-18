@@ -20,7 +20,9 @@ type Shoe struct {
 }
 
 func createcard(suit string, name string, value int) *Card {
-	return &Card{suit: suit, name: fmt.Sprintf("%v of %s", name, suit), value: value}
+	card := Card{suit: suit, name: fmt.Sprintf("%v of %s", name, suit), value: value}
+	//fmt.Println(card)
+	return &card
 }
 
 func numbercards(suit string, values [9]int, c chan []*Card) {
@@ -64,7 +66,7 @@ func CreateDeck(output chan *Deck) {
 
 	go suitcards("Hearts", c)
 	go suitcards("Diamonds", c)
-	go suitcards("Aces", c)
+	go suitcards("Clubs", c)
 	go suitcards("Spades", c)
 
 	spades, aces, diamonds, hearts := <-c, <-c, <-c, <-c
@@ -79,7 +81,7 @@ func CreateDeck(output chan *Deck) {
 
 func CreateShoe() *Shoe {
 
-	shoe := Shoe{cut: 26 * 5} //make ir random
+	shoe := Shoe{cut: 26 * 5} //make it random TODO
 	//fix for now at 6
 	c := make(chan *Deck)
 
