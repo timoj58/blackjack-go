@@ -2,50 +2,35 @@ package deck
 
 import (
 	"fmt"
+
+	"tabiiki.com/card"
 )
 
-type Card struct {
-	suit  string
-	name  string
-	value int
-}
-
 type Deck struct {
-	cards []*Card
+	Cards []*card.Card
 }
 
-type Shoe struct {
-	cards []*Card
-	cut   int
-}
-
-func createcard(suit string, name string, value int) *Card {
-	card := Card{suit: suit, name: fmt.Sprintf("%v of %s", name, suit), value: value}
-	//fmt.Println(card)
-	return &card
-}
-
-func numbercards(suit string, values [9]int, c chan []*Card) {
-	var cards []*Card
+func numbercards(suit string, values [9]int, c chan []*card.Card) {
+	var cards []*card.Card
 	for _, value := range values {
-		cards = append(cards, createcard(suit, fmt.Sprintf("%v", value), value))
+		cards = append(cards, card.Create(suit, fmt.Sprintf("%v", value), value))
 	}
 	c <- cards
 
 }
 
-func facecards(suit string, values [3]string, c chan []*Card) {
-	var cards []*Card
+func facecards(suit string, values [3]string, c chan []*card.Card) {
+	var cards []*card.Card
 	for _, value := range values {
-		cards = append(cards, createcard(suit, value, 10))
+		cards = append(cards, card.Create(suit, value, 10))
 	}
 	c <- cards
 
 }
 
-func suitcards(suit string, output chan []*Card) {
-	c := make(chan []*Card)
-	var cards []*Card
+func suitcards(suit string, output chan []*card.Card) {
+	c := make(chan []*card.Card)
+	var cards []*card.Card
 	values := [9]int{1, 2, 3, 4, 5, 6, 7, 8, 9}
 	faces := [3]string{"King", "Queen", "Jack"}
 
@@ -54,15 +39,15 @@ func suitcards(suit string, output chan []*Card) {
 	x, y := <-c, <-c
 	cards = append(cards, x...)
 	cards = append(cards, y...)
-	cards = append(cards, &Card{suit: suit, name: fmt.Sprintf("Ace of %s", suit), value: 11})
+	cards = append(cards, card.Ace(suit))
 
 	output <- cards
 
 }
 
-func CreateDeck(output chan *Deck) {
+func Create(output chan *Deck) {
 	deck := Deck{}
-	c := make(chan []*Card)
+	c := make(chan []*card.Card)
 
 	go suitcards("Hearts", c)
 	go suitcards("Diamonds", c)
@@ -71,36 +56,10 @@ func CreateDeck(output chan *Deck) {
 
 	spades, aces, diamonds, hearts := <-c, <-c, <-c, <-c
 
-	deck.cards = append(deck.cards, spades...)
-	deck.cards = append(deck.cards, aces...)
-	deck.cards = append(deck.cards, diamonds...)
-	deck.cards = append(deck.cards, hearts...)
+	deck.Cards = append(deck.Cards, spades...)
+	deck.Cards = append(deck.Cards, aces...)
+	deck.Cards = append(deck.Cards, diamonds...)
+	deck.Cards = append(deck.Cards, hearts...)
 
 	output <- &deck
-}
-
-func CreateShoe() *Shoe {
-
-	shoe := Shoe{cut: 26 * 5} //make it random TODO
-	//fix for now at 6
-	c := make(chan *Deck)
-
-	go CreateDeck(c)
-	go CreateDeck(c)
-	go CreateDeck(c)
-	go CreateDeck(c)
-	go CreateDeck(c)
-
-	x, y, z, j, k := <-c, <-c, <-c, <-c, <-c
-	shoe.cards = append(shoe.cards, x.cards...)
-	shoe.cards = append(shoe.cards, y.cards...)
-	shoe.cards = append(shoe.cards, z.cards...)
-	shoe.cards = append(shoe.cards, j.cards...)
-	shoe.cards = append(shoe.cards, k.cards...)
-
-	return &shoe
-}
-
-func Shuffle(shoe *Shoe) *Shoe {
-	return shoe
 }
