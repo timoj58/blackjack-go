@@ -19,22 +19,56 @@ type Shoe struct {
 	cut   int
 }
 
-func Create() *Deck {
+func numbercards(suit string, values [9]int, c chan []Card) {
+	var cards []Card
+	for _, value := range values {
+		cards = append(cards, Card{suit: suit, name: fmt.Sprintf("%v of %s", value, suit), value: value})
+	}
+	c <- cards
+
+}
+
+func facecards(suit string, values [3]string, c chan []Card) {
+	var cards []Card
+	for _, value := range values {
+		cards = append(cards, Card{suit: suit, name: fmt.Sprintf("%v of %s", value, suit), value: 10})
+	}
+	c <- cards
+
+}
+
+func suitcards(suit string, output chan []Card) {
+	c := make(chan []Card)
+	var cards []Card
 	values := [9]int{1, 2, 3, 4, 5, 6, 7, 8, 9}
 	faces := [3]string{"King", "Queen", "Jack"}
-	suits := [4]string{"Diamonds", "Hearts", "Spades", "Clubs"}
+
+	go numbercards(suit, values, c)
+	go facecards(suit, faces, c)
+	x, y := <-c, <-c
+	cards = append(cards, x...)
+	cards = append(cards, y...)
+	cards = append(cards, Card{suit: suit, name: fmt.Sprintf("Ace of %s", suit), value: 11})
+
+	output <- cards
+
+}
+
+func Create() *Deck {
 	deck := Deck{}
+	c := make(chan []Card)
 
-	for _, suit := range suits {
-		for _, value := range values {
-			deck.cards = append(deck.cards, Card{suit: suit, name: fmt.Sprintf("%v of %s", value, suit), value: value})
-		}
+	go suitcards("Hearts", c)
+	go suitcards("Diamonds", c)
+	go suitcards("Aces", c)
+	go suitcards("Spades", c)
 
-		for _, face := range faces {
-			deck.cards = append(deck.cards, Card{suit: suit, name: fmt.Sprintf("%s of %s", face, suit), value: 10})
-		}
-		deck.cards = append(deck.cards, Card{suit: suit, name: fmt.Sprintf("Ace of %s", suit), value: 11})
-	}
+	spades, aces, diamonds, hearts := <-c, <-c, <-c, <-c
+
+	deck.cards = append(deck.cards, spades...)
+	deck.cards = append(deck.cards, aces...)
+	deck.cards = append(deck.cards, diamonds...)
+	deck.cards = append(deck.cards, hearts...)
 
 	return &deck
 }
