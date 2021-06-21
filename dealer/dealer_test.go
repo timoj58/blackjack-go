@@ -5,7 +5,9 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	var dealer = Create()
+	c := make(chan *Dealer)
+	go Create(c)
+	dealer := <-c
 	if len(dealer.Shoe.Cards) != dealer.Cut {
 		t.Fatalf("length is incorrect")
 	}

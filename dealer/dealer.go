@@ -42,7 +42,9 @@ func cutplacement(decks int) int {
 	return cutplacement(decks)
 }
 
-func splitandshuffle(cards []*card.Card) []*card.Card {
+func splitandshuffle(dealer string, cards []*card.Card) []*card.Card {
+	
+	fmt.Println(fmt.Sprintf("dealer %s is shuffling", dealer))
 	var shuffled []*card.Card
     c := make(chan []*card.Card)
 
@@ -66,14 +68,15 @@ func shufflesplit(cards []*card.Card, c chan []*card.Card) {
 }
 
 
-func Create() *Dealer {
+func Create(output chan *Dealer) {
 	rand.Seed(time.Now().UnixNano())
 	totaldecks := numberofdecks()
 	cut := cutplacement(totaldecks)
 	shoe := shoe.Create(totaldecks)
 	dealer := Dealer{Id: uuid.New().String(), Cut: cut, Shoe: shoe} 
+	//fmt.Println(fmt.Sprintf("dealer %s, cut: %v, total cards: %v", dealer.Id, dealer.Cut, len(dealer.Shoe.Cards)))
 
-	return Shuffle(&dealer)
+	output <- Shuffle(&dealer)
 }
 
 
@@ -83,18 +86,17 @@ func Shuffle(dealer *Dealer) *Dealer {
 
 	//needs to be sequential (obviously)
 	for i := 0; i < 100; i++ {
-	  shuffled = splitandshuffle(dealer.Shoe.Cards)
+	  shuffled = splitandshuffle(dealer.Id, dealer.Shoe.Cards)
 	}
     
 	//cut
+	//fmt.Println(fmt.Sprintf("cut is %v for dealer %s, shuffled length %v", dealer.Cut, dealer.Id, len(shuffled)))
+
 	dealer.Shoe.Cuts = shuffled[dealer.Cut:]
 	dealer.Shoe.Cards = shuffled[:dealer.Cut]
 
-	fmt.Println(fmt.Sprintf("cards: %v, cut: %v", len(dealer.Shoe.Cards), len(dealer.Shoe.Cuts)))
+	fmt.Println(fmt.Sprintf("cards: %v, cut: %v for %s", len(dealer.Shoe.Cards), len(dealer.Shoe.Cuts), dealer.Id))
 
-	for _, value := range dealer.Shoe.Cards {
-		fmt.Println(value.Name)
-	}
-
+	
     return dealer
 }
