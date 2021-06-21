@@ -43,20 +43,20 @@ func cutplacement(decks int) int {
 }
 
 func splitandshuffle(cards []*card.Card) []*card.Card {
-	    var shuffled []*card.Card
-	    c := make(chan []*card.Card)
+	var shuffled []*card.Card
+    c := make(chan []*card.Card)
 
-		go shufflesplit(cards[:len(cards)/2], c)
-		go shufflesplit(cards[len(cards)/2:], c)
+	go shufflesplit(cards[:len(cards)/2], c)
+	go shufflesplit(cards[len(cards)/2:], c)
 
-		x, y := <-c, <-c
+	x, y := <-c, <-c
 		
-		shuffled = append(shuffled, y...)
-	    shuffled = append(shuffled, x...)
+	shuffled = append(shuffled, y...)
+    shuffled = append(shuffled, x...)
 
-		rand.Shuffle(len(shuffled), func(i, j int) { shuffled[i], shuffled[j] = shuffled[j], shuffled[i] })
+	rand.Shuffle(len(shuffled), func(i, j int) { shuffled[i], shuffled[j] = shuffled[j], shuffled[i] })
 
-		return shuffled
+	return shuffled
 
 }
 
