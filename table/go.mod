@@ -14,6 +14,7 @@ replace tabiiki.com/deck => ../deck
 
 require (
 	github.com/google/uuid v1.2.0
+	tabiiki.com/card v0.0.0-00010101000000-000000000000
 	tabiiki.com/dealer v0.0.0-00010101000000-000000000000
 	tabiiki.com/player v0.0.0-00010101000000-000000000000
 )

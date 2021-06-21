@@ -44,7 +44,7 @@ func cutplacement(decks int) int {
 
 func splitandshuffle(dealer string, cards []*card.Card) []*card.Card {
 	
-	fmt.Println(fmt.Sprintf("dealer %s is shuffling", dealer))
+	//fmt.Println(fmt.Sprintf("dealer %s is shuffling", dealer))
 	var shuffled []*card.Card
     c := make(chan []*card.Card)
 
@@ -99,4 +99,11 @@ func Shuffle(dealer *Dealer) *Dealer {
 
 	
     return dealer
+}
+
+func Hit(dealer *Dealer) *card.Card {
+   card := dealer.Shoe.Cards[:1][0]
+   dealer.Shoe.Cards = dealer.Shoe.Cards[1:]
+   dealer.Shoe.Cuts = append(dealer.Shoe.Cuts, card)	
+   return card
 }
