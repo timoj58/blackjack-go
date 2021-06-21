@@ -1,36 +1,35 @@
-package deck
+package model
 
 import (
 	"fmt"
 
-	"tabiiki.com/card"
 )
 
 type Deck struct {
-	Cards []*card.Card
+	Cards []*Card
 }
 
-func numbercards(suit string, values [9]int, c chan []*card.Card) {
-	var cards []*card.Card
+func numbercards(suit string, values [9]int, c chan []*Card) {
+	var cards []*Card
 	for _, value := range values {
-		cards = append(cards, card.Create(suit, fmt.Sprintf("%v", value), value))
+		cards = append(cards, CreateCard(suit, fmt.Sprintf("%v", value), value))
 	}
 	c <- cards
 
 }
 
-func facecards(suit string, values [3]string, c chan []*card.Card) {
-	var cards []*card.Card
+func facecards(suit string, values [3]string, c chan []*Card) {
+	var cards []*Card
 	for _, value := range values {
-		cards = append(cards, card.Create(suit, value, 10))
+		cards = append(cards, CreateCard(suit, value, 10))
 	}
 	c <- cards
 
 }
 
-func suitcards(suit string, output chan []*card.Card) {
-	c := make(chan []*card.Card)
-	var cards []*card.Card
+func suitcards(suit string, output chan []*Card) {
+	c := make(chan []*Card)
+	var cards []*Card
 	values := [9]int{2, 3, 4, 5, 6, 7, 8, 9, 10}
 	faces := [3]string{"King", "Queen", "Jack"}
 
@@ -39,15 +38,15 @@ func suitcards(suit string, output chan []*card.Card) {
 	x, y := <-c, <-c
 	cards = append(cards, x...)
 	cards = append(cards, y...)
-	cards = append(cards, card.Ace(suit))
+	cards = append(cards, Ace(suit))
 
 	output <- cards
 
 }
 
-func Create(output chan *Deck) {
+func CreateDeck(output chan *Deck) {
 	deck := Deck{}
-	c := make(chan []*card.Card)
+	c := make(chan []*Card)
 
 	go suitcards("Hearts", c)
 	go suitcards("Diamonds", c)

@@ -1,4 +1,4 @@
-package shoe
+package service
 
 import (
 	"testing"
@@ -7,8 +7,8 @@ import (
 
 
 func TestCreate(t *testing.T) {
-	var shoe = Create(10)
-	if len(shoe.Cards) != (52 * 10) {
+	var casino = CreateCasino(10)
+	if len(casino.Tables) != 10 {
 		t.Fatalf("length is incorrect")
 	}
 

@@ -2,18 +2,13 @@ module tabiiki.com/blackjack
 
 go 1.16
 
-replace tabiiki.com/casino => ./casino
+require (
+	github.com/google/uuid v1.2.0
+	github.com/gorilla/websocket v1.4.2
+)
 
-replace tabiiki.com/table => ./table
+replace tabiiki.com/blackjack/actor => ../actor
 
-replace tabiiki.com/dealer => ./dealer
+replace tabiiki.com/blackjack/model => ../model
 
-replace tabiiki.com/player => ./player
-
-replace tabiiki.com/shoe => ./shoe
-
-replace tabiiki.com/deck => ./deck
-
-replace tabiiki.com/card => ./card
-
-require tabiiki.com/casino v0.0.0-00010101000000-000000000000
+replace tabiiki.com/blackjack/service => ./service

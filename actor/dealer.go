@@ -1,11 +1,7 @@
-package dealer
+package actor
 
 import (
 	"github.com/google/uuid"
-
-	"tabiiki.com/shoe"
-
-	"tabiiki.com/card"
 
 	"math/rand"
 
@@ -13,12 +9,14 @@ import (
 
 	"fmt"
 
+	"tabiiki.com/blackjack/model"
+
 )
 
 
 type Dealer struct {
 	Id   string
-	Shoe *shoe.Shoe
+	Shoe *model.Shoe
 	Cut  int 
 }
 
@@ -42,11 +40,11 @@ func cutplacement(decks int) int {
 	return cutplacement(decks)
 }
 
-func splitandshuffle(dealer string, cards []*card.Card) []*card.Card {
+func splitandshuffle(dealer string, cards []*model.Card) []*model.Card {
 	
 	//fmt.Println(fmt.Sprintf("dealer %s is shuffling", dealer))
-	var shuffled []*card.Card
-    c := make(chan []*card.Card)
+	var shuffled []*model.Card
+    c := make(chan []*model.Card)
 
 	go shufflesplit(cards[:len(cards)/2], c)
 	go shufflesplit(cards[len(cards)/2:], c)
@@ -62,7 +60,7 @@ func splitandshuffle(dealer string, cards []*card.Card) []*card.Card {
 
 }
 
-func shufflesplit(cards []*card.Card, c chan []*card.Card) {
+func shufflesplit(cards []*model.Card, c chan []*model.Card) {
 	rand.Shuffle(len(cards), func(i, j int) { cards[i], cards[j] = cards[j], cards[i] })
      c <- cards
 }
@@ -70,7 +68,7 @@ func shufflesplit(cards []*card.Card, c chan []*card.Card) {
 
 func shuffle(dealer *Dealer) {
 
-	var shuffled []*card.Card
+	var shuffled []*model.Card
 
 	//needs to be sequential (obviously)
 	for i := 0; i < 100; i++ {
@@ -96,11 +94,11 @@ func Reshuffle(dealer *Dealer) {
 	shuffle(dealer)
 }
 
-func Create(output chan *Dealer) {
+func CreateDealer(output chan *Dealer) {
 	rand.Seed(time.Now().UnixNano())
 	totaldecks := numberofdecks()
 	cut := cutplacement(totaldecks)
-	shoe := shoe.Create(totaldecks)
+	shoe := model.CreateShoe(totaldecks)
 	dealer := Dealer{Id: uuid.New().String(), Cut: cut, Shoe: shoe} 
 	//fmt.Println(fmt.Sprintf("dealer %s, cut: %v, total cards: %v", dealer.Id, dealer.Cut, len(dealer.Shoe.Cards)))
     shuffle(&dealer)
@@ -108,14 +106,14 @@ func Create(output chan *Dealer) {
 }
 
 
-func Hit(dealer *Dealer) *card.Card {
+func Hit(dealer *Dealer) *model.Card {
    card := dealer.Shoe.Cards[:1][0]
    dealer.Shoe.Cards = dealer.Shoe.Cards[1:]
    dealer.Shoe.Cuts = append(dealer.Shoe.Cuts, card)	
    return card
 }
 
-func Check(cards []*card.Card) int {
+func Check(cards []*model.Card) int {
    total := 0
 
    for _, card := range cards {

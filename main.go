@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"tabiiki.com/casino"
+	"tabiiki.com/blackjack/service"
 )
 
 var addr = flag.String("addr", ":8080", "http service address")
@@ -12,10 +12,10 @@ var addr = flag.String("addr", ":8080", "http service address")
 
 func main() {
 	flag.Parse()
-	c := casino.Create(10)
+	c := service.CreateCasino(10)
 	go c.Run()
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		casino.ServeWs(c, w, r)
+		service.ServeWs(c, w, r)
 	})
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {

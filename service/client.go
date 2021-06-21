@@ -1,10 +1,10 @@
-package casino
+package service
 
 import (
 	"time"
 	"github.com/gorilla/websocket"
 	"bytes"
-	"tabiiki.com/player"
+	"tabiiki.com/blackjack/actor"
 )
 
 const (
@@ -35,7 +35,7 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	casino *Casino
 
-	player *player.Player
+	player *actor.Player
 
 	// The websocket connection.
 	conn *websocket.Conn

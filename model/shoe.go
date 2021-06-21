@@ -1,24 +1,20 @@
-package shoe
+package model
 
-import (
-	"tabiiki.com/card"
-	"tabiiki.com/deck"
-)
 
 type Shoe struct {
-	Cards []*card.Card
-	Cuts  []*card.Card
+	Cards []*Card
+	Cuts  []*Card
 }
 
 
-func Create(total int) *Shoe {
+func CreateShoe(total int) *Shoe {
 
 	shoe := Shoe{}
-	c := make(chan *deck.Deck)
+	c := make(chan *Deck)
 
 
 	for i := 0; i < total; i++ {
-		go deck.Create(c)
+		go CreateDeck(c)
 	}
 
 	for i := 0; i < total; i++ {

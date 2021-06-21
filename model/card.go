@@ -1,4 +1,4 @@
-package card
+package model
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ type Card struct {
 	Visible bool
 }
 
-func Create(suit string, name string, value int) *Card {
+func CreateCard(suit string, name string, value int) *Card {
 	card := Card{Suit: suit, Name: fmt.Sprintf("%v of %s", name, suit), Value: value, Visible: true}
 	//fmt.Println(card)
 	return &card
