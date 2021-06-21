@@ -54,10 +54,10 @@ func Create(output chan *Deck) {
 	go suitcards("Clubs", c)
 	go suitcards("Spades", c)
 
-	spades, aces, diamonds, hearts := <-c, <-c, <-c, <-c
+	spades, clubs, diamonds, hearts := <-c, <-c, <-c, <-c
 
 	deck.Cards = append(deck.Cards, spades...)
-	deck.Cards = append(deck.Cards, aces...)
+	deck.Cards = append(deck.Cards, clubs...)
 	deck.Cards = append(deck.Cards, diamonds...)
 	deck.Cards = append(deck.Cards, hearts...)
 
