@@ -10,7 +10,7 @@ type Deck struct {
 	Cards []*card.Card
 }
 
-func numbercards(suit string, values [9]int, c chan []*card.Card) {
+func numbercards(suit string, values [8]int, c chan []*card.Card) {
 	var cards []*card.Card
 	for _, value := range values {
 		cards = append(cards, card.Create(suit, fmt.Sprintf("%v", value), value))
@@ -31,7 +31,7 @@ func facecards(suit string, values [3]string, c chan []*card.Card) {
 func suitcards(suit string, output chan []*card.Card) {
 	c := make(chan []*card.Card)
 	var cards []*card.Card
-	values := [9]int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	values := [8]int{2, 3, 4, 5, 6, 7, 8, 9}
 	faces := [3]string{"King", "Queen", "Jack"}
 
 	go numbercards(suit, values, c)

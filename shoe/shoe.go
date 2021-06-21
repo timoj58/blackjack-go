@@ -14,7 +14,6 @@ type Shoe struct {
 func Create(total int) *Shoe {
 
 	shoe := Shoe{}
-	//fix for now at 6
 	c := make(chan *deck.Deck)
 
 
