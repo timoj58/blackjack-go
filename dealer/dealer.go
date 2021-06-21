@@ -68,19 +68,7 @@ func shufflesplit(cards []*card.Card, c chan []*card.Card) {
 }
 
 
-func Create(output chan *Dealer) {
-	rand.Seed(time.Now().UnixNano())
-	totaldecks := numberofdecks()
-	cut := cutplacement(totaldecks)
-	shoe := shoe.Create(totaldecks)
-	dealer := Dealer{Id: uuid.New().String(), Cut: cut, Shoe: shoe} 
-	//fmt.Println(fmt.Sprintf("dealer %s, cut: %v, total cards: %v", dealer.Id, dealer.Cut, len(dealer.Shoe.Cards)))
-
-	output <- Shuffle(&dealer)
-}
-
-
-func Shuffle(dealer *Dealer) *Dealer {
+func shuffle(dealer *Dealer) {
 
 	var shuffled []*card.Card
 
@@ -97,9 +85,28 @@ func Shuffle(dealer *Dealer) *Dealer {
 
 	fmt.Println(fmt.Sprintf("cards: %v, cut: %v for %s", len(dealer.Shoe.Cards), len(dealer.Shoe.Cuts), dealer.Id))
 
-	
-    return dealer
 }
+
+func Reshuffle(dealer *Dealer) {
+	rand.Seed(time.Now().UnixNano())
+	dealer.Shoe.Cards = append(dealer.Shoe.Cards, dealer.Shoe.Cuts...)
+	dealer.Shoe.Cuts = dealer.Shoe.Cuts[:0]
+	dealer.Cut = cutplacement(len(dealer.Shoe.Cards)/52)
+
+	shuffle(dealer)
+}
+
+func Create(output chan *Dealer) {
+	rand.Seed(time.Now().UnixNano())
+	totaldecks := numberofdecks()
+	cut := cutplacement(totaldecks)
+	shoe := shoe.Create(totaldecks)
+	dealer := Dealer{Id: uuid.New().String(), Cut: cut, Shoe: shoe} 
+	//fmt.Println(fmt.Sprintf("dealer %s, cut: %v, total cards: %v", dealer.Id, dealer.Cut, len(dealer.Shoe.Cards)))
+    shuffle(&dealer)
+	output <- &dealer
+}
+
 
 func Hit(dealer *Dealer) *card.Card {
    card := dealer.Shoe.Cards[:1][0]
@@ -107,3 +114,13 @@ func Hit(dealer *Dealer) *card.Card {
    dealer.Shoe.Cuts = append(dealer.Shoe.Cuts, card)	
    return card
 }
+
+func Check(cards []*card.Card) int {
+   total := 0
+
+   for _, card := range cards {
+	 total += card.Value
+   }
+
+   return total
+} 

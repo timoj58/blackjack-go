@@ -15,6 +15,18 @@ func TestCreate(t *testing.T) {
 }
 
 
+func TestReshuffle(t *testing.T) {
+	c := make(chan *Dealer)
+	go Create(c)
+	dealer := <-c
+	go Reshuffle(dealer)
+	if len(dealer.Shoe.Cards) != dealer.Cut {
+		t.Fatalf("length is incorrect")
+	}
+}
+
+
+
 func TestHit(t *testing.T) {
 	c := make(chan *Dealer)
 	go Create(c)

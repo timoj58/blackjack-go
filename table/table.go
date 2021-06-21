@@ -9,6 +9,8 @@ import (
 
 	"tabiiki.com/player"
 
+	"fmt"
+
 )
 
 
@@ -27,6 +29,7 @@ func Create(output chan *Table) {
 }
 
 func Join(table *Table, player *player.Player) {
+	fmt.Println(fmt.Sprintf("player %s has joined", player.Id))
     table.Players = append(table.Players, player)
 }
 

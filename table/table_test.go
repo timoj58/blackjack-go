@@ -3,6 +3,7 @@ package table
 import (
 	"testing"
 	"tabiiki.com/player"
+	"tabiiki.com/dealer"
 	"fmt"
 )
 
@@ -48,7 +49,9 @@ func TestStart(t *testing.T) {
 	fmt.Println(fmt.Sprintf("dealer hole cards: %s", table.HouseCards[1].Name))
 
 	for _, player := range table.Players {
-		fmt.Println(fmt.Sprintf("player %s cards: %s, %s", player.Id, player.Cards[0].Name, player.Cards[1].Name))
+		fmt.Print(fmt.Sprintf("player %s cards: %s, %s, ", player.Id, player.Cards[0].Name, player.Cards[1].Name))
+		fmt.Println(fmt.Sprintf("total is %v", dealer.Check(player.Cards)))
+		
 	}
 
 }
