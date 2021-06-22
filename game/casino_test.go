@@ -1,6 +1,6 @@
-package service
+package game
 
-import (
+import
 	"testing"
 )
 

@@ -13,4 +13,4 @@ replace tabiiki.com/blackjack/model => ../model
 
 replace tabiiki.com/blackjack/util => ../util
 
-replace tabiiki.com/blackjack/service => ./service
+replace tabiiki.com/blackjack/game => ./game

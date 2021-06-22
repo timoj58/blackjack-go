@@ -1,4 +1,4 @@
-package service
+package game
 
 import (
 	"tabiiki.com/blackjack/actor"
