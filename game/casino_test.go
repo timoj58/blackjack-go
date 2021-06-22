@@ -1,6 +1,6 @@
 package game
 
-import
+import (
 	"testing"
 )
 

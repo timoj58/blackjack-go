@@ -35,34 +35,6 @@ func broadcast(table *Table, sender *actor.Player, message string) {
 	}
 }
 
-func processNatural(table *Table) {
-	var blackjack []string
-
-	for _, player := range table.Players {
-		if Process(player.Cards) == "Blackjack" {
-			blackjack = append(blackjack, player.Id)
-			broadcast(table, nil, fmt.Sprintf("player %s has blackjack", player.Id))
-		}
-	}
-
-	if len(blackjack) > 0 {
-		broadcast(table, nil, fmt.Sprintf("dealer: shoecard %s", table.HouseCards[1].Name))
-		if Process(table.HouseCards) == "Blackjack" {
-			broadcast(table, nil, fmt.Sprintf("dealer has blackjack"))
-			for _, player := range blackjack {
-				broadcast(table, nil, fmt.Sprintf("player %s has tied", player))
-			}
-		} else {
-			for _, player := range blackjack {
-				broadcast(table, nil, fmt.Sprintf("player %s has won", player))
-			}
-		}
-		table.Inplay = false
-	} else {
-		broadcast(table, nil, "please wait for your turn to be called...")
-	}
-}
-
 func CreateTable(output chan *Table) {
 	rand.Seed(time.Now().UnixNano())
 
@@ -121,7 +93,7 @@ func Start(table *Table) {
 	holeCard.Visible = false
 	table.HouseCards = append(table.HouseCards, holeCard)
 
-	processNatural(table)
+	ProcessNatural(table)
 
 }
 
