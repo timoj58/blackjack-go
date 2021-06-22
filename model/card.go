@@ -5,9 +5,9 @@ import (
 )
 
 type Card struct {
-	Suit  string
-	Name  string
-	Value int
+	Suit    string
+	Name    string
+	Value   int
 	Visible bool
 }
 
@@ -20,4 +20,3 @@ func CreateCard(suit string, name string, value int) *Card {
 func Ace(suit string) *Card {
 	return &Card{Suit: suit, Name: fmt.Sprintf("Ace of %s", suit), Value: 11, Visible: true}
 }
-

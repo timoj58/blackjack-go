@@ -1,35 +1,32 @@
 package service
 
-
 import (
-	"net/http"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"tabiiki.com/blackjack/actor"
-	
 )
 
 type Casino struct {
-	Tables map[string]*Table
-	clients map[string]*Client
-	broadcast chan []byte
-	register chan *Client
+	Tables     map[string]*Table
+	clients    map[string]*Client
+	broadcast  chan []byte
+	register   chan *Client
 	unregister chan *Client
 }
 
 type Message struct {
-	PlayerId string  `json:"playerId"`
-	Action string `json:"action"`
-	Data string `json:"data"`
+	PlayerId string `json:"playerId"`
+	Action   string `json:"action"`
+	Data     string `json:"data"`
 }
-
 
 func join(casino *Casino, payload *Message) {
 	//ideally would use a map for table...
 	for _, t := range casino.Tables {
 		if t.Id == payload.Data {
-			fmt.Println(fmt.Sprintf("player %s is joining table %s", payload.PlayerId ,payload.Data))
-            Join(t, casino.clients[payload.PlayerId].player)
+			fmt.Println(fmt.Sprintf("player %s is joining table %s", payload.PlayerId, payload.Data))
+			Join(t, casino.clients[payload.PlayerId].player)
 		}
 	}
 }
@@ -38,8 +35,8 @@ func leave(casino *Casino, payload *Message) {
 	//ideally would use a map for table...
 	for _, t := range casino.Tables {
 		if t.Id == payload.Data {
-			fmt.Println(fmt.Sprintf("player %s is leaving table %s", payload.PlayerId ,payload.Data))
-            Leave(t, casino.clients[payload.PlayerId].player)
+			fmt.Println(fmt.Sprintf("player %s is leaving table %s", payload.PlayerId, payload.Data))
+			Leave(t, casino.clients[payload.PlayerId].player)
 		}
 	}
 	listtables(casino.clients[payload.PlayerId], casino)
@@ -47,12 +44,11 @@ func leave(casino *Casino, payload *Message) {
 
 func listtables(client *Client, casino *Casino) {
 	for _, table := range casino.Tables {
-        if !table.Inplay { 
-		 client.send <-  []byte(fmt.Sprintf("table %s, stake: %v, %v players currently", table.Id, table.Stake, len(table.Players)))
+		if !table.Inplay {
+			client.send <- []byte(fmt.Sprintf("table %s, stake: %v, %v players currently", table.Id, table.Stake, len(table.Players)))
 		}
 	}
 }
-
 
 func CreateCasino(tables int) *Casino {
 	casino := Casino{
@@ -64,7 +60,7 @@ func CreateCasino(tables int) *Casino {
 	}
 
 	c := make(chan *Table)
-    
+
 	for i := 0; i < tables; i++ {
 		go CreateTable(c)
 	}
@@ -75,7 +71,6 @@ func CreateCasino(tables int) *Casino {
 		casino.Tables[t.Id] = t
 	}
 
-
 	return &casino
 }
 
@@ -84,7 +79,7 @@ func (casino *Casino) Run() {
 		select {
 		case client := <-casino.register:
 			casino.clients[client.player.Id] = client
-			client.send <-  []byte(fmt.Sprintf("Welcome player %s, select a table to join", client.player.Id))
+			client.send <- []byte(fmt.Sprintf("Welcome player %s, select a table to join", client.player.Id))
 			listtables(client, casino)
 		case client := <-casino.unregister:
 			if _, ok := casino.clients[client.player.Id]; ok {
@@ -92,7 +87,7 @@ func (casino *Casino) Run() {
 				close(client.send)
 			}
 		case message := <-casino.broadcast:
-		    payload := Message{}
+			payload := Message{}
 			json.Unmarshal(message, &payload)
 			switch payload.Action {
 			case "join":
@@ -101,8 +96,8 @@ func (casino *Casino) Run() {
 				leave(casino, &payload)
 			default:
 				//table message received, relay it, action not relevant here.
-			}		
-		} 
+			}
+		}
 	}
 }
 
@@ -114,10 +109,10 @@ func ServeWs(casino *Casino, w http.ResponseWriter, r *http.Request) {
 	}
 	channel := make(chan []byte, 256)
 	client := &Client{
-		casino: casino, 
-		conn: conn, 
+		casino: casino,
+		conn:   conn,
 		player: actor.CreatePlayer(1000, channel),
-		send: channel}
+		send:   channel}
 	client.casino.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in

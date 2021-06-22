@@ -2,7 +2,6 @@ package model
 
 import (
 	"fmt"
-
 )
 
 type Deck struct {

@@ -1,10 +1,10 @@
 package service
 
 import (
-	"time"
-	"github.com/gorilla/websocket"
 	"bytes"
+	"github.com/gorilla/websocket"
 	"tabiiki.com/blackjack/actor"
+	"time"
 )
 
 const (
@@ -61,12 +61,12 @@ func (c *Client) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				
+
 			}
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-      	c.casino.broadcast <- message
+		c.casino.broadcast <- message
 	}
 }
 
@@ -115,4 +115,3 @@ func (c *Client) writePump() {
 		}
 	}
 }
-
