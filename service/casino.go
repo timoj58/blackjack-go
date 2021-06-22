@@ -48,7 +48,7 @@ func leave(casino *Casino, payload *Message) {
 func listtables(client *Client, casino *Casino) {
 	for _, table := range casino.Tables {
         if !table.Inplay { 
-		 client.send <-  []byte(fmt.Sprintf("table %s, %v players currently", table.Id, len(table.Players)))
+		 client.send <-  []byte(fmt.Sprintf("table %s, stake: %v, %v players currently", table.Id, table.Stake, len(table.Players)))
 		}
 	}
 }
@@ -112,11 +112,12 @@ func ServeWs(casino *Casino, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+	channel := make(chan []byte, 256)
 	client := &Client{
 		casino: casino, 
 		conn: conn, 
-		player: actor.CreatePlayer(1000),
-		send: make(chan []byte, 256)}
+		player: actor.CreatePlayer(1000, channel),
+		send: channel}
 	client.casino.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in

@@ -11,6 +11,8 @@ import (
 
 	"tabiiki.com/blackjack/model"
 
+	"tabiiki.com/blackjack/util"
+
 )
 
 
@@ -40,39 +42,13 @@ func cutplacement(decks int) int {
 	return cutplacement(decks)
 }
 
-func splitandshuffle(dealer string, cards []*model.Card) []*model.Card {
-	
-	//fmt.Println(fmt.Sprintf("dealer %s is shuffling", dealer))
-	var shuffled []*model.Card
-    c := make(chan []*model.Card)
-
-	go shufflesplit(cards[:len(cards)/2], c)
-	go shufflesplit(cards[len(cards)/2:], c)
-
-	x, y := <-c, <-c
-		
-	shuffled = append(shuffled, y...)
-    shuffled = append(shuffled, x...)
-
-	rand.Shuffle(len(shuffled), func(i, j int) { shuffled[i], shuffled[j] = shuffled[j], shuffled[i] })
-
-	return shuffled
-
-}
-
-func shufflesplit(cards []*model.Card, c chan []*model.Card) {
-	rand.Shuffle(len(cards), func(i, j int) { cards[i], cards[j] = cards[j], cards[i] })
-     c <- cards
-}
-
-
 func shuffle(dealer *Dealer) {
 
 	var shuffled []*model.Card
 
 	//needs to be sequential (obviously)
 	for i := 0; i < 100; i++ {
-	  shuffled = splitandshuffle(dealer.Id, dealer.Shoe.Cards)
+	  shuffled = util.SplitAndShuffle(dealer.Id, dealer.Shoe.Cards)
 	}
     
 	//cut
@@ -84,6 +60,7 @@ func shuffle(dealer *Dealer) {
 	fmt.Println(fmt.Sprintf("cards: %v, cut: %v for %s", len(dealer.Shoe.Cards), len(dealer.Shoe.Cuts), dealer.Id))
 
 }
+
 
 func Reshuffle(dealer *Dealer) {
 	rand.Seed(time.Now().UnixNano())
@@ -113,12 +90,21 @@ func Hit(dealer *Dealer) *model.Card {
    return card
 }
 
-func Check(cards []*model.Card) int {
-   total := 0
-
-   for _, card := range cards {
-	 total += card.Value
+func Validate(cards []*model.Card) map[string]int {
+   validated := make(map[string]int)
+   values := util.Values(cards)
+   
+   for _, value := range values {
+	   if value == 21 {
+		   validated["Blackjack"] = value
+	   }
+	   if(value < 21) {
+		validated["Continue"] = value
+	   }
+	   if(value > 21) {
+		validated["Bust"] = value
+	   }
    }
-
-   return total
+   
+   return validated
 } 
