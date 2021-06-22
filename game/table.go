@@ -50,51 +50,27 @@ func CreateTable(output chan *Table) {
 }
 
 func Join(table *Table, player *actor.Player) {
-	fmt.Println(fmt.Sprintf("player %s has joined", player.Id))
+	broadcast(table, nil, fmt.Sprintf("player %s has joined", player.Id))
 	table.Players[player.Id] = player
 	if len(table.Players) == 1 {
 		table.Countdown = 10
 	}
-	//player.Send <- []byte("hello there waiting for new players")
 }
 
 func Leave(table *Table, player *actor.Player) {
-	fmt.Println(fmt.Sprintf("player %s has left", player.Id))
 	delete(table.Players, player.Id)
+	broadcast(table, player, fmt.Sprintf("player %s has left", player.Id))
 }
 
-func Start(table *Table) {
-	Init(table)
-	table.Inplay = true
-	table.HouseCards = table.HouseCards[:0]
-	for _, player := range table.Players {
-		player.Cards = player.Cards[:0]
+func Event(table *Table, message *Message) {
+	switch message.Action {
+	case "hit":
+		Hit(table, message.PlayerId)
+	case "stick":
+		Stick(table, message.PlayerId)
+	default:
+		//ignore other cases for now. (split etc)
 	}
-	//first card
-	for _, player := range table.Players {
-		card := actor.Hit(table.Dealer)
-		player.Cards = append(player.Cards, card)
-		broadcast(table, nil, fmt.Sprintf("player %s: card %s", player.Id, card.Name))
-	}
-
-	//dealer card
-	dealerCard := actor.Hit(table.Dealer)
-	table.HouseCards = append(table.HouseCards, dealerCard)
-	broadcast(table, nil, fmt.Sprintf("dealer: card %s", dealerCard.Name))
-
-	//second cards
-	for _, player := range table.Players {
-		secondCard := actor.Hit(table.Dealer)
-		player.Cards = append(player.Cards, secondCard)
-		broadcast(table, nil, fmt.Sprintf("player %s: card %s", player.Id, secondCard.Name))
-	}
-	//dealer hole card
-	holeCard := actor.Hit(table.Dealer)
-	holeCard.Visible = false
-	table.HouseCards = append(table.HouseCards, holeCard)
-
-	ProcessNatural(table)
-
 }
 
 func (table *Table) Run() {
@@ -109,18 +85,19 @@ func (table *Table) Run() {
 				//countdown till start
 				time.Sleep(time.Second)
 
-				broadcast(table, nil, fmt.Sprintf("%v seconds till game starts", table.Countdown))
+				broadcast(table, nil, fmt.Sprintf("%v seconds till game starts...", table.Countdown))
 
 				table.Countdown -= 1
 			}
 
 		}
 
+		//need to put a lock on this.....
 		if table.Inplay {
 
 			time.Sleep(2 * time.Second)
 			if !GetNotified(table.GameState) {
-				broadcast(table, NextPlayer(table.GameState), "Its your turn")
+				broadcast(table, NextPlayer(table.GameState), "Its your turn!")
 				SetNotified(table.GameState, true)
 			}
 

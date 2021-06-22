@@ -21,6 +21,10 @@ type Message struct {
 	Data     string `json:"data"`
 }
 
+func event(casino *Casino, payload *Message) {
+	Event(casino.Tables[payload.Data], payload)
+}
+
 func join(casino *Casino, payload *Message) {
 	//ideally would use a map for table...
 	for _, t := range casino.Tables {
@@ -95,7 +99,7 @@ func (casino *Casino) Run() {
 			case "leave":
 				leave(casino, &payload)
 			default:
-				//table message received, relay it, action not relevant here.
+				event(casino, &payload)
 			}
 		}
 	}

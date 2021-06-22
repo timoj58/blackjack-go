@@ -17,19 +17,44 @@ type GameState struct {
 	CurrentTurn  int
 }
 
+func getCard(table *Table, player *actor.Player) {
+	card := actor.Hit(table.Dealer)
+	player.Cards = append(player.Cards, card)
+	broadcast(table, nil, fmt.Sprintf("player %s %s", player.Id, card.Name))
+}
+
+//end of game
+func Process(table *Table) {
+	table.Inplay = false
+}
+
+func ProcessPlayer(table *Table, player *actor.Player) {
+	switch ProcessCards(player.Cards) {
+	case "Blackjack":
+		broadcast(table, nil, fmt.Sprintf("player %s has blackjack", player.Id))
+		Blackjack(table)
+	case "Continue":
+		SetPlayerState(table.GameState, "Continue")
+	case "Bust":
+		broadcast(table, nil, fmt.Sprintf("player %s is bust", player.Id))
+		Bust(table)
+
+	}
+}
+
 func ProcessNatural(table *Table) {
 	var blackjack []string
 
 	for _, player := range table.Players {
-		if Process(player.Cards) == "Blackjack" {
+		if ProcessCards(player.Cards) == "Blackjack" {
 			blackjack = append(blackjack, player.Id)
 			broadcast(table, nil, fmt.Sprintf("player %s has blackjack", player.Id))
 		}
 	}
 
 	if len(blackjack) > 0 {
-		broadcast(table, nil, fmt.Sprintf("dealer: shoecard %s", table.HouseCards[1].Name))
-		if Process(table.HouseCards) == "Blackjack" {
+		broadcast(table, nil, fmt.Sprintf("dealer hole %s", table.HouseCards[1].Name))
+		if ProcessCards(table.HouseCards) == "Blackjack" {
 			broadcast(table, nil, fmt.Sprintf("dealer has blackjack"))
 			for _, player := range blackjack {
 				broadcast(table, nil, fmt.Sprintf("player %s has tied", player))
@@ -45,7 +70,7 @@ func ProcessNatural(table *Table) {
 	}
 }
 
-func Process(cards []*model.Card) string {
+func ProcessCards(cards []*model.Card) string {
 
 	validated := actor.Validate(cards)
 	if _, ok := validated["Blackjack"]; ok {
@@ -74,6 +99,36 @@ func Init(table *Table) {
 	table.GameState = &gameState
 }
 
+func Start(table *Table) {
+	Init(table)
+	table.Inplay = true
+	table.Countdown = 0
+	table.HouseCards = table.HouseCards[:0]
+	for _, player := range table.Players {
+		player.Cards = player.Cards[:0]
+	}
+	//first card
+	for _, player := range table.Players {
+		getCard(table, player)
+	}
+
+	//dealer card
+	dealerCard := actor.Hit(table.Dealer)
+	table.HouseCards = append(table.HouseCards, dealerCard)
+	broadcast(table, nil, fmt.Sprintf("dealer %s", dealerCard.Name))
+
+	//second cards
+	for _, player := range table.Players {
+		getCard(table, player)
+	}
+	//dealer hole card
+	holeCard := actor.Hit(table.Dealer)
+	holeCard.Visible = false
+	table.HouseCards = append(table.HouseCards, holeCard)
+
+	ProcessNatural(table)
+}
+
 func NextPlayer(gameState *GameState) *actor.Player {
 	return gameState.SeatingOrder[gameState.CurrentTurn].Player
 }
@@ -84,4 +139,47 @@ func SetNotified(gameState *GameState, notified bool) {
 
 func GetNotified(gameState *GameState) bool {
 	return gameState.SeatingOrder[gameState.CurrentTurn].Notified
+}
+
+func SetPlayerState(gameState *GameState, state string) {
+	gameState.SeatingOrder[gameState.CurrentTurn].State = state
+
+}
+
+func PlayerFinished(table *Table) {
+	if table.GameState.CurrentTurn == len(table.GameState.SeatingOrder)-1 {
+		//the end.  process it all.
+		Process(table)
+	} else {
+		table.GameState.CurrentTurn++
+	}
+}
+
+func Hit(table *Table, id string) {
+	var player = table.Players[id]
+	getCard(table, player)
+
+	ProcessPlayer(table, player)
+	SetNotified(table.GameState, false)
+}
+
+func Bust(table *Table) {
+	SetPlayerState(table.GameState, "Bust")
+	SetNotified(table.GameState, false)
+	PlayerFinished(table)
+}
+
+func Blackjack(table *Table) {
+	SetPlayerState(table.GameState, "Blackjack")
+	SetNotified(table.GameState, false)
+	PlayerFinished(table)
+}
+
+func Stick(table *Table, id string) {
+	var player = table.Players[id]
+	getCard(table, player)
+
+	SetPlayerState(table.GameState, "Stick")
+	SetNotified(table.GameState, false)
+	PlayerFinished(table)
 }
