@@ -25,7 +25,7 @@ func getCard(table *Table, player *actor.Player) {
 
 //end of game
 func Process(table *Table) {
-	table.Inplay = false
+   table.Inplay = false
 }
 
 func ProcessPlayer(table *Table, player *actor.Player) {
@@ -33,8 +33,8 @@ func ProcessPlayer(table *Table, player *actor.Player) {
 	case "Blackjack":
 		broadcast(table, nil, fmt.Sprintf("player %s has blackjack", player.Id))
 		Blackjack(table)
-	case "Continue":
-		SetPlayerState(table.GameState, "Continue")
+	case "Continue": 
+	    SetPlayerState(table.GameState, "Continue")
 	case "Bust":
 		broadcast(table, nil, fmt.Sprintf("player %s is bust", player.Id))
 		Bust(table)
@@ -129,6 +129,7 @@ func Start(table *Table) {
 	ProcessNatural(table)
 }
 
+
 func NextPlayer(gameState *GameState) *actor.Player {
 	return gameState.SeatingOrder[gameState.CurrentTurn].Player
 }
@@ -147,20 +148,20 @@ func SetPlayerState(gameState *GameState, state string) {
 }
 
 func PlayerFinished(table *Table) {
-	if table.GameState.CurrentTurn == len(table.GameState.SeatingOrder)-1 {
+	if table.GameState.CurrentTurn == len(table.GameState.SeatingOrder) -1 {
 		//the end.  process it all.
 		Process(table)
-	} else {
+	}else{
 		table.GameState.CurrentTurn++
 	}
 }
 
 func Hit(table *Table, id string) {
-	var player = table.Players[id]
+    var player = table.Players[id]
 	getCard(table, player)
 
 	ProcessPlayer(table, player)
-	SetNotified(table.GameState, false)
+    SetNotified(table.GameState, false)
 }
 
 func Bust(table *Table) {
@@ -175,8 +176,9 @@ func Blackjack(table *Table) {
 	PlayerFinished(table)
 }
 
+
 func Stick(table *Table, id string) {
-	var player = table.Players[id]
+    var player = table.Players[id]
 	getCard(table, player)
 
 	SetPlayerState(table.GameState, "Stick")

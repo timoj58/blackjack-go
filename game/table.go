@@ -9,13 +9,14 @@ import (
 	"time"
 )
 
+
 type Table struct {
 	Id         string
 	Dealer     *actor.Dealer
 	Players    map[string]*actor.Player
 	HouseCards []*model.Card
 	Countdown  int
-	Inplay     bool
+	Inplay     bool //this needs to be a channel
 	Stake      int
 	GameState  *GameState
 }
