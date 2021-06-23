@@ -40,7 +40,7 @@ func cutplacement(decks int) int {
 	return cutplacement(decks)
 }
 
-func shuffle(dealer *Dealer) {
+func (dealer *Dealer) shuffle() {
 
 	var shuffled []*model.Card
 
@@ -59,13 +59,13 @@ func shuffle(dealer *Dealer) {
 
 }
 
-func Reshuffle(dealer *Dealer) {
+func (dealer *Dealer) Reshuffle() {
 	rand.Seed(time.Now().UnixNano())
 	dealer.Shoe.Cards = append(dealer.Shoe.Cards, dealer.Shoe.Cuts...)
 	dealer.Shoe.Cuts = dealer.Shoe.Cuts[:0]
 	dealer.Cut = cutplacement(len(dealer.Shoe.Cards) / 52)
 
-	shuffle(dealer)
+	dealer.shuffle()
 }
 
 func CreateDealer(output chan *Dealer) {
@@ -75,11 +75,11 @@ func CreateDealer(output chan *Dealer) {
 	shoe := model.CreateShoe(totaldecks)
 	dealer := Dealer{Id: uuid.New().String(), Cut: cut, Shoe: shoe}
 	//fmt.Println(fmt.Sprintf("dealer %s, cut: %v, total cards: %v", dealer.Id, dealer.Cut, len(dealer.Shoe.Cards)))
-	shuffle(&dealer)
+	dealer.shuffle()
 	output <- &dealer
 }
 
-func Hit(dealer *Dealer) *model.Card {
+func (dealer *Dealer) Hit() *model.Card {
 	card := dealer.Shoe.Cards[:1][0]
 	dealer.Shoe.Cards = dealer.Shoe.Cards[1:]
 	dealer.Shoe.Cuts = append(dealer.Shoe.Cuts, card)

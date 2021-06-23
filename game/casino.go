@@ -21,32 +21,32 @@ type Message struct {
 	Data     string `json:"data"`
 }
 
-func event(casino *Casino, payload *Message) {
-	Event(casino.Tables[payload.Data], payload)
+func (casino *Casino) event(payload *Message) {
+	casino.Tables[payload.Data].event(payload)
 }
 
-func join(casino *Casino, payload *Message) {
+func (casino *Casino) join(payload *Message) {
 	//ideally would use a map for table...
 	for _, t := range casino.Tables {
 		if t.Id == payload.Data {
 			fmt.Println(fmt.Sprintf("player %s is joining table %s", payload.PlayerId, payload.Data))
-			Join(t, casino.clients[payload.PlayerId].player)
+			t.join(casino.clients[payload.PlayerId].player)
 		}
 	}
 }
 
-func leave(casino *Casino, payload *Message) {
+func (casino *Casino) leave(payload *Message) {
 	//ideally would use a map for table...
 	for _, t := range casino.Tables {
 		if t.Id == payload.Data {
 			fmt.Println(fmt.Sprintf("player %s is leaving table %s", payload.PlayerId, payload.Data))
-			Leave(t, casino.clients[payload.PlayerId].player)
+			t.leave(casino.clients[payload.PlayerId].player)
 		}
 	}
-	listtables(casino.clients[payload.PlayerId], casino)
+	casino.listtables(casino.clients[payload.PlayerId])
 }
 
-func listtables(client *Client, casino *Casino) {
+func (casino *Casino) listtables(client *Client) {
 	for _, table := range casino.Tables {
 		if !table.Inplay {
 			client.send <- []byte(fmt.Sprintf("table %s, stake: %v, %v players currently", table.Id, table.Stake, len(table.Players)))
@@ -71,7 +71,7 @@ func CreateCasino(tables int) *Casino {
 
 	for i := 0; i < tables; i++ {
 		t := <-c
-		go t.Run()
+		go t.run()
 		casino.Tables[t.Id] = t
 	}
 
@@ -84,7 +84,7 @@ func (casino *Casino) Run() {
 		case client := <-casino.register:
 			casino.clients[client.player.Id] = client
 			client.send <- []byte(fmt.Sprintf("Welcome player %s, select a table to join", client.player.Id))
-			listtables(client, casino)
+			casino.listtables(client)
 		case client := <-casino.unregister:
 			if _, ok := casino.clients[client.player.Id]; ok {
 				delete(casino.clients, client.player.Id)
@@ -95,11 +95,11 @@ func (casino *Casino) Run() {
 			json.Unmarshal(message, &payload)
 			switch payload.Action {
 			case "join":
-				join(casino, &payload)
+				casino.join(&payload)
 			case "leave":
-				leave(casino, &payload)
+				casino.leave(&payload)
 			default:
-				event(casino, &payload)
+				casino.event(&payload)
 			}
 		}
 	}

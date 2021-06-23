@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-
 type Table struct {
 	Id         string
 	Dealer     *actor.Dealer
@@ -28,7 +27,7 @@ func tablestake() int {
 	return stakes[index]
 }
 
-func broadcast(table *Table, sender *actor.Player, message string) {
+func (table *Table) broadcast(sender *actor.Player, message string) {
 	for _, player := range table.Players {
 		if sender == nil || sender.Id == player.Id {
 			player.Send <- []byte(message)
@@ -50,20 +49,20 @@ func CreateTable(output chan *Table) {
 	output <- &table
 }
 
-func Join(table *Table, player *actor.Player) {
-	broadcast(table, nil, fmt.Sprintf("player %s has joined", player.Id))
+func (table *Table) join(player *actor.Player) {
+	table.broadcast(nil, fmt.Sprintf("player %s has joined", player.Id))
 	table.Players[player.Id] = player
 	if len(table.Players) == 1 {
 		table.Countdown = 10
 	}
 }
 
-func Leave(table *Table, player *actor.Player) {
+func (table *Table) leave(player *actor.Player) {
 	delete(table.Players, player.Id)
-	broadcast(table, player, fmt.Sprintf("player %s has left", player.Id))
+	table.broadcast(player, fmt.Sprintf("player %s has left", player.Id))
 }
 
-func Event(table *Table, message *Message) {
+func (table *Table) event(message *Message) {
 	switch message.Action {
 	case "hit":
 		Hit(table, message.PlayerId)
@@ -74,19 +73,19 @@ func Event(table *Table, message *Message) {
 	}
 }
 
-func (table *Table) Run() {
+func (table *Table) run() {
 
 	for {
 		if !table.Inplay && len(table.Players) > 0 {
 
 			if table.Countdown == 0 {
-				broadcast(table, nil, "game starting...")
+				table.broadcast(nil, "game starting...")
 				Start(table)
 			} else {
 				//countdown till start
 				time.Sleep(time.Second)
 
-				broadcast(table, nil, fmt.Sprintf("%v seconds till game starts...", table.Countdown))
+				table.broadcast(nil, fmt.Sprintf("%v seconds till game starts...", table.Countdown))
 
 				table.Countdown -= 1
 			}
@@ -98,7 +97,7 @@ func (table *Table) Run() {
 
 			time.Sleep(2 * time.Second)
 			if !GetNotified(table.GameState) {
-				broadcast(table, NextPlayer(table.GameState), "Its your turn!")
+				table.broadcast(NextPlayer(table.GameState), "Its your turn!")
 				SetNotified(table.GameState, true)
 			}
 

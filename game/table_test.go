@@ -21,7 +21,7 @@ func TestJoin(t *testing.T) {
 	c := make(chan *Table)
 	go CreateTable(c)
 	table := <-c
-	Join(table, actor.CreatePlayer(100, channel))
+	table.join(actor.CreatePlayer(100, channel))
 
 	if len(table.Players) != 1 {
 		t.Fatalf("players is incorrect")
@@ -34,11 +34,11 @@ func TestStart(t *testing.T) {
 	channel := make(chan []byte, 256)
 	go CreateTable(c)
 	table := <-c
-	Join(table, actor.CreatePlayer(100, channel))
-	Join(table, actor.CreatePlayer(100, channel))
-	Join(table, actor.CreatePlayer(100, channel))
-	Join(table, actor.CreatePlayer(100, channel))
-	Join(table, actor.CreatePlayer(100, channel))
+	table.join(actor.CreatePlayer(100, channel))
+	table.join(actor.CreatePlayer(100, channel))
+	table.join(actor.CreatePlayer(100, channel))
+	table.join(actor.CreatePlayer(100, channel))
+	table.join(actor.CreatePlayer(100, channel))
 
 	Start(table)
 
