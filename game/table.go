@@ -85,23 +85,14 @@ func (table *Table) run() {
 				table.broadcast(nil, "game starting...")
 				table.start()
 			} else {
-				//countdown till start
 				time.Sleep(time.Second)
 
 				table.broadcast(nil, fmt.Sprintf("%v seconds till game starts...", table.Countdown))
-
 				table.Countdown -= 1
 			}
 
 		}
-		if inplay {
 
-			if !table.GameState.getNotified() {
-				table.broadcast(table.GameState.nextPlayer(), "Its your turn!")
-				table.GameState.setNotified(true)
-			}
-
-		}
 	}
 
 }

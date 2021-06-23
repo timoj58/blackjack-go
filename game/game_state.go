@@ -36,17 +36,6 @@ func (gameState *GameState) nextPlayer() *actor.Player {
 	return gameState.SeatingOrder[gameState.CurrentTurn].Player
 }
 
-func (gameState *GameState) setNotified(notified bool) {
-	gameState.SeatingOrder[gameState.CurrentTurn].Notified = notified
-}
-
-func (gameState *GameState) getNotified() bool {
-	if gameState.SeatingOrder[gameState.CurrentTurn].State != "Continue" {
-		return true
-	}
-	return gameState.SeatingOrder[gameState.CurrentTurn].Notified
-}
-
 func (gameState *GameState) setPlayerState(state string) {
 	gameState.SeatingOrder[gameState.CurrentTurn].State = state
 

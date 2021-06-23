@@ -79,6 +79,7 @@ func (table *Table) processPlayer(player *actor.Player) {
 		table.blackjack()
 	case "Continue":
 		table.GameState.setPlayerState("Continue")
+		table.broadcast(table.GameState.nextPlayer(), "Its your turn!")
 	case "Bust":
 		table.broadcast(nil, fmt.Sprintf("player %s is bust", player.Id))
 		table.bust()
@@ -131,6 +132,7 @@ func (table *Table) processNatural() {
 		table.supervisor.update(false)
 	} else {
 		table.broadcast(nil, "please wait for your turn to be called...")
+		table.broadcast(table.GameState.nextPlayer(), "Its your turn!")
 		table.supervisor.update(true)
 	}
 }
@@ -198,6 +200,7 @@ func (table *Table) playerFinished() {
 		table.process()
 	} else {
 		table.GameState.CurrentTurn++
+		table.broadcast(table.GameState.nextPlayer(), "Its your turn!")
 	}
 }
 
@@ -206,23 +209,19 @@ func (table *Table) hit(id string) {
 	table.getCard(player)
 
 	table.processPlayer(player)
-	table.GameState.setNotified(false)
 }
 
 func (table *Table) bust() {
 	table.GameState.setPlayerState("Bust")
-	table.GameState.setNotified(false)
 	table.playerFinished()
 }
 
 func (table *Table) blackjack() {
 	table.GameState.setPlayerState("Blackjack")
-	table.GameState.setNotified(false)
 	table.playerFinished()
 }
 
 func (table *Table) stick(id string) {
 	table.GameState.setPlayerState("Stick")
-	table.GameState.setNotified(false)
 	table.playerFinished()
 }
