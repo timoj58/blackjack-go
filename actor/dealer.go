@@ -20,24 +20,24 @@ type Dealer struct {
 	Cut  int
 }
 
-func numberofdecks() int {
+func numberOfDecks() int {
 
 	total := rand.Intn(10)
 	if total != 0 {
 
 		return total
 	}
-	return numberofdecks()
+	return numberOfDecks()
 }
 
-func cutplacement(decks int) int {
+func cutPlacement(decks int) int {
 	total := rand.Intn(52 * decks)
 	lower := (decks * 52) / 2
 	upper := (decks * 52) - 10
 	if total >= lower && total <= upper {
 		return total
 	}
-	return cutplacement(decks)
+	return cutPlacement(decks)
 }
 
 func (dealer *Dealer) shuffle() {
@@ -59,19 +59,19 @@ func (dealer *Dealer) shuffle() {
 
 }
 
-func (dealer *Dealer) Reshuffle() {
+func (dealer *Dealer) reShuffle() {
 	rand.Seed(time.Now().UnixNano())
 	dealer.Shoe.Cards = append(dealer.Shoe.Cards, dealer.Shoe.Cuts...)
 	dealer.Shoe.Cuts = dealer.Shoe.Cuts[:0]
-	dealer.Cut = cutplacement(len(dealer.Shoe.Cards) / 52)
+	dealer.Cut = cutPlacement(len(dealer.Shoe.Cards) / 52)
 
 	dealer.shuffle()
 }
 
 func CreateDealer(output chan *Dealer) {
 	rand.Seed(time.Now().UnixNano())
-	totaldecks := numberofdecks()
-	cut := cutplacement(totaldecks)
+	totaldecks := numberOfDecks()
+	cut := cutPlacement(totaldecks)
 	shoe := model.CreateShoe(totaldecks)
 	dealer := Dealer{Id: uuid.New().String(), Cut: cut, Shoe: shoe}
 	//fmt.Println(fmt.Sprintf("dealer %s, cut: %v, total cards: %v", dealer.Id, dealer.Cut, len(dealer.Shoe.Cards)))

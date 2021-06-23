@@ -15,12 +15,12 @@ type Table struct {
 	Players    map[string]*actor.Player
 	HouseCards []*model.Card
 	Countdown  int
-	Inplay     bool //this needs to be a channel
+	supervisor *TableSupervisor
 	Stake      int
 	GameState  *GameState
 }
 
-func tablestake() int {
+func tableStake() int {
 	stakes := []int{10, 25, 50, 75}
 	index := rand.Intn(4)
 
@@ -41,33 +41,34 @@ func CreateTable(output chan *Table) {
 	c := make(chan *actor.Dealer)
 	go actor.CreateDealer(c)
 	table := Table{
-		Id:      uuid.New().String(),
-		Dealer:  <-c,
-		Players: make(map[string]*actor.Player),
-		Stake:   tablestake(),
-		Inplay:  false}
+		Id:         uuid.New().String(),
+		Dealer:     <-c,
+		Players:    make(map[string]*actor.Player),
+		Stake:      tableStake(),
+		Countdown:  30,
+		supervisor: CreateTableSupervisor(make(chan bool))}
+
+	go table.supervisor.run()
+
 	output <- &table
 }
 
 func (table *Table) join(player *actor.Player) {
-	table.broadcast(nil, fmt.Sprintf("player %s has joined", player.Id))
+	table.broadcast(nil, fmt.Sprintf("player %s has joined table", player.Id))
 	table.Players[player.Id] = player
-	if len(table.Players) == 1 {
-		table.Countdown = 10
-	}
 }
 
 func (table *Table) leave(player *actor.Player) {
 	delete(table.Players, player.Id)
-	table.broadcast(player, fmt.Sprintf("player %s has left", player.Id))
+	table.broadcast(player, fmt.Sprintf("player %s has left table", player.Id))
 }
 
 func (table *Table) event(message *Message) {
 	switch message.Action {
 	case "hit":
-		Hit(table, message.PlayerId)
+		table.hit(message.PlayerId)
 	case "stick":
-		Stick(table, message.PlayerId)
+		table.stick(message.PlayerId)
 	default:
 		//ignore other cases for now. (split etc)
 	}
@@ -76,11 +77,13 @@ func (table *Table) event(message *Message) {
 func (table *Table) run() {
 
 	for {
-		if !table.Inplay && len(table.Players) > 0 {
+		inplay := <-table.supervisor.c
+
+		if !inplay && len(table.Players) > 0 {
 
 			if table.Countdown == 0 {
 				table.broadcast(nil, "game starting...")
-				Start(table)
+				table.start()
 			} else {
 				//countdown till start
 				time.Sleep(time.Second)
@@ -91,17 +94,14 @@ func (table *Table) run() {
 			}
 
 		}
+		if inplay {
 
-		//need to put a lock on this.....
-		if table.Inplay {
-
-			time.Sleep(2 * time.Second)
-			if !GetNotified(table.GameState) {
-				table.broadcast(NextPlayer(table.GameState), "Its your turn!")
-				SetNotified(table.GameState, true)
+			if !table.GameState.getNotified() {
+				table.broadcast(table.GameState.nextPlayer(), "Its your turn!")
+				table.GameState.setNotified(true)
 			}
 
 		}
-
 	}
+
 }

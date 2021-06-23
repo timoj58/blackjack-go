@@ -43,12 +43,12 @@ func (casino *Casino) leave(payload *Message) {
 			t.leave(casino.clients[payload.PlayerId].player)
 		}
 	}
-	casino.listtables(casino.clients[payload.PlayerId])
+	casino.listTables(casino.clients[payload.PlayerId])
 }
 
-func (casino *Casino) listtables(client *Client) {
+func (casino *Casino) listTables(client *Client) {
 	for _, table := range casino.Tables {
-		if !table.Inplay {
+		if !<-table.supervisor.c {
 			client.send <- []byte(fmt.Sprintf("table %s, stake: %v, %v players currently", table.Id, table.Stake, len(table.Players)))
 		}
 	}
@@ -84,7 +84,7 @@ func (casino *Casino) Run() {
 		case client := <-casino.register:
 			casino.clients[client.player.Id] = client
 			client.send <- []byte(fmt.Sprintf("Welcome player %s, select a table to join", client.player.Id))
-			casino.listtables(client)
+			casino.listTables(client)
 		case client := <-casino.unregister:
 			if _, ok := casino.clients[client.player.Id]; ok {
 				delete(casino.clients, client.player.Id)
