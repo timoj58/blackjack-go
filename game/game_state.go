@@ -24,7 +24,7 @@ func (gameState *GameState) getHighScore() int {
 			highScore = 21
 		} else if playerState.State == "Stick" && highScore != 21 {
 			total := actor.Validate(playerState.Player.Cards)["Continue"]
-			if total < highScore {
+			if total > highScore {
 				highScore = total
 			}
 		}

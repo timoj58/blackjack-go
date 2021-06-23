@@ -80,6 +80,10 @@ func CreateDealer(output chan *Dealer) {
 }
 
 func (dealer *Dealer) Hit() *model.Card {
+	if len(dealer.Shoe.Cards) == 0 {
+		dealer.reShuffle()
+	}
+
 	card := dealer.Shoe.Cards[:1][0]
 	dealer.Shoe.Cards = dealer.Shoe.Cards[1:]
 	dealer.Shoe.Cuts = append(dealer.Shoe.Cuts, card)

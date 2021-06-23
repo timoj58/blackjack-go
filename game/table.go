@@ -45,7 +45,7 @@ func CreateTable(output chan *Table) {
 		Dealer:     <-c,
 		Players:    make(map[string]*actor.Player),
 		Stake:      tableStake(),
-		Countdown:  30,
+		Countdown:  15,
 		supervisor: CreateTableSupervisor(make(chan bool))}
 
 	go table.supervisor.run()

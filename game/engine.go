@@ -127,7 +127,7 @@ func (table *Table) processNatural() {
 			for _, player := range blackjack {
 				table.broadcast(nil, fmt.Sprintf("player %s has won", player))
 			}
-		} 
+		}
 		table.supervisor.update(false)
 	} else {
 		table.broadcast(nil, "please wait for your turn to be called...")
@@ -167,7 +167,7 @@ func (table *Table) init() {
 
 func (table *Table) start() {
 	table.init()
-	table.Countdown = 30
+	table.Countdown = 15
 	table.HouseCards = table.HouseCards[:0]
 	for _, player := range table.Players {
 		player.Cards = player.Cards[:0]

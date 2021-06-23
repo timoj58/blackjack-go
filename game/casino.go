@@ -94,6 +94,8 @@ func (casino *Casino) Run() {
 			payload := Message{}
 			json.Unmarshal(message, &payload)
 			switch payload.Action {
+			case "list":
+				casino.listTables(casino.clients[payload.PlayerId])
 			case "join":
 				casino.join(&payload)
 			case "leave":
