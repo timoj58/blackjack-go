@@ -100,12 +100,12 @@ func Validate(cards []*model.Card) map[string]int {
 		if value < 21 {
 			if _, ok := validated["Continue"]; ok {
 				if validated["Continue"] < value {
-					validated["Continue"] = value	
-				} 
-			}else{
+					validated["Continue"] = value
+				}
+			} else {
 				validated["Continue"] = value
 			}
-			
+
 		}
 		if value > 21 {
 			validated["Bust"] = value

@@ -28,9 +28,9 @@ func (casino *Casino) event(payload *Message) {
 func (casino *Casino) join(payload *Message) {
 	var table = casino.Tables[payload.Data]
 
-	if ! <-table.supervisor.c {
+	if !<-table.supervisor.c {
 		table.join(casino.clients[payload.PlayerId].player)
-	}else{
+	} else {
 		casino.clients[payload.PlayerId].send <- []byte("table is currently in session")
 	}
 }
@@ -38,12 +38,12 @@ func (casino *Casino) join(payload *Message) {
 func (casino *Casino) leave(payload *Message) {
 	var table = casino.Tables[payload.Data]
 
-	if ! <-table.supervisor.c {
+	if !<-table.supervisor.c {
 		table.leave(casino.clients[payload.PlayerId].player)
 		casino.listTables(casino.clients[payload.PlayerId])
-		}else{
+	} else {
 		casino.clients[payload.PlayerId].send <- []byte("table is currently in session")
-	}	
+	}
 }
 
 func (casino *Casino) listTables(client *Client) {
