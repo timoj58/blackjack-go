@@ -21,6 +21,11 @@ type Message struct {
 	Data     string `json:"data"`
 }
 
+func (casino *Casino) funds(payload *Message) {
+	var client = casino.clients[payload.PlayerId]
+	client.send <- []byte(fmt.Sprintf("your funds are %v", client.player.Funds))
+}
+
 func (casino *Casino) event(payload *Message) {
 	var table = casino.Tables[payload.Data]
 	if <-table.supervisor.c {
@@ -103,6 +108,8 @@ func (casino *Casino) Run() {
 				casino.join(&payload)
 			case "leave":
 				casino.leave(&payload)
+			case "funds":
+				casino.funds(&payload)
 			default:
 				casino.event(&payload)
 			}

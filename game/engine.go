@@ -32,15 +32,19 @@ func (table *Table) processWinners(highScore int, dealerTotal int) {
 	for _, playerState := range table.GameState.SeatingOrder {
 		if playerState.State == "Blackjack" {
 			if dealerTotal != 21 {
+				playerState.Player.Funds += table.Stake * 2
 				table.broadcast(nil, fmt.Sprintf("player %s wins", playerState.Player.Id))
 			} else {
+				playerState.Player.Funds += table.Stake
 				table.broadcast(nil, fmt.Sprintf("player %s ties", playerState.Player.Id))
 			}
 		} else if playerState.State == "Stick" && highScore != 21 {
 			total := actor.Validate(playerState.Player.Cards)["Continue"]
 			if total == highScore && total > dealerTotal {
+				playerState.Player.Funds += table.Stake * 2
 				table.broadcast(nil, fmt.Sprintf("player %s wins", playerState.Player.Id))
 			} else if total == highScore && dealerTotal == total {
+				playerState.Player.Funds += table.Stake
 				table.broadcast(nil, fmt.Sprintf("player %s ties", playerState.Player.Id))
 			}
 		}
@@ -122,10 +126,12 @@ func (table *Table) processNatural() {
 		if ProcessCards(table.HouseCards) == "Blackjack" {
 			table.broadcast(nil, fmt.Sprintf("dealer has blackjack"))
 			for _, player := range blackjack {
+				table.Players[player].Funds += table.Stake
 				table.broadcast(nil, fmt.Sprintf("player %s has tied", player))
 			}
 		} else {
 			for _, player := range blackjack {
+				table.Players[player].Funds += table.Stake * 2
 				table.broadcast(nil, fmt.Sprintf("player %s has won", player))
 			}
 		}
@@ -173,6 +179,7 @@ func (table *Table) start() {
 	table.HouseCards = table.HouseCards[:0]
 	for _, player := range table.Players {
 		player.Cards = player.Cards[:0]
+		player.Funds -= table.Stake
 	}
 	//first card
 	for _, player := range table.Players {

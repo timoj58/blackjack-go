@@ -54,8 +54,12 @@ func CreateTable(output chan *Table) {
 }
 
 func (table *Table) join(player *actor.Player) {
-	table.broadcast(nil, fmt.Sprintf("player %s has joined table", player.Id))
-	table.Players[player.Id] = player
+	if len(table.Players) < 7 {
+		table.broadcast(nil, fmt.Sprintf("player %s has joined table", player.Id))
+		table.Players[player.Id] = player
+	} else {
+		table.broadcast(player, "table is full, try another")
+	}
 }
 
 func (table *Table) leave(player *actor.Player) {
@@ -78,6 +82,15 @@ func (table *Table) event(message *Message) {
 	}
 }
 
+func (table *Table) checkFunds() {
+	for _, player := range table.Players {
+		if player.Funds < table.Stake {
+			table.broadcast(player, "you have insufficient funds for this table, you have been kicked out!!!")
+			table.leave(player)
+		}
+	}
+}
+
 func (table *Table) run() {
 
 	for {
@@ -85,6 +98,8 @@ func (table *Table) run() {
 
 		if !inplay && len(table.Players) > 0 {
 
+			//make sure the players have the funds...else kick them out.
+			table.checkFunds()
 			if table.Countdown == 0 {
 				table.broadcast(nil, "game starting...")
 				table.start()
@@ -95,6 +110,9 @@ func (table *Table) run() {
 				table.Countdown -= 1
 			}
 
+		} else if !inplay && len(table.Players) == 0 {
+			//reset incase we have kicked some players out, or they left
+			table.Countdown = 15
 		}
 
 	}
