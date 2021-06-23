@@ -55,8 +55,6 @@ func (dealer *Dealer) shuffle() {
 	dealer.Shoe.Cuts = shuffled[dealer.Cut:]
 	dealer.Shoe.Cards = shuffled[:dealer.Cut]
 
-	fmt.Println(fmt.Sprintf("cards: %v, cut: %v for %s", len(dealer.Shoe.Cards), len(dealer.Shoe.Cuts), dealer.Id))
-
 }
 
 func (dealer *Dealer) reShuffle() {
@@ -81,6 +79,7 @@ func CreateDealer(output chan *Dealer) {
 
 func (dealer *Dealer) Hit() *model.Card {
 	if len(dealer.Shoe.Cards) == 0 {
+		fmt.Println("reshuffing")
 		dealer.reShuffle()
 	}
 
@@ -99,7 +98,14 @@ func Validate(cards []*model.Card) map[string]int {
 			validated["Blackjack"] = value
 		}
 		if value < 21 {
-			validated["Continue"] = value
+			if _, ok := validated["Continue"]; ok {
+				if validated["Continue"] < value {
+					validated["Continue"] = value	
+				} 
+			}else{
+				validated["Continue"] = value
+			}
+			
 		}
 		if value > 21 {
 			validated["Bust"] = value

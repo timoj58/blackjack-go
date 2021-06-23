@@ -26,30 +26,30 @@ func (casino *Casino) event(payload *Message) {
 }
 
 func (casino *Casino) join(payload *Message) {
-	//ideally would use a map for table...
-	for _, t := range casino.Tables {
-		if t.Id == payload.Data {
-			fmt.Println(fmt.Sprintf("player %s is joining table %s", payload.PlayerId, payload.Data))
-			t.join(casino.clients[payload.PlayerId].player)
-		}
+	var table = casino.Tables[payload.Data]
+
+	if ! <-table.supervisor.c {
+		table.join(casino.clients[payload.PlayerId].player)
+	}else{
+		casino.clients[payload.PlayerId].send <- []byte("table is currently in session")
 	}
 }
 
 func (casino *Casino) leave(payload *Message) {
-	//ideally would use a map for table...
-	for _, t := range casino.Tables {
-		if t.Id == payload.Data {
-			fmt.Println(fmt.Sprintf("player %s is leaving table %s", payload.PlayerId, payload.Data))
-			t.leave(casino.clients[payload.PlayerId].player)
-		}
-	}
-	casino.listTables(casino.clients[payload.PlayerId])
+	var table = casino.Tables[payload.Data]
+
+	if ! <-table.supervisor.c {
+		table.leave(casino.clients[payload.PlayerId].player)
+		casino.listTables(casino.clients[payload.PlayerId])
+		}else{
+		casino.clients[payload.PlayerId].send <- []byte("table is currently in session")
+	}	
 }
 
 func (casino *Casino) listTables(client *Client) {
 	for _, table := range casino.Tables {
 		if !<-table.supervisor.c {
-			client.send <- []byte(fmt.Sprintf("table %s, stake: %v, %v players currently", table.Id, table.Stake, len(table.Players)))
+			client.send <- []byte(fmt.Sprintf("table %s, cut: %v stake: %v, %v players", table.Id, table.Dealer.Cut, table.Stake, len(table.Players)))
 		}
 	}
 }
