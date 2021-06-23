@@ -15,16 +15,79 @@ type PlayerState struct {
 type GameState struct {
 	SeatingOrder []*PlayerState
 	CurrentTurn  int
+	DealerState  *PlayerState
 }
 
-func getCard(table *Table, player *actor.Player) {
+func (table *Table) getCard(player *actor.Player) {
 	card := table.Dealer.Hit()
 	player.Cards = append(player.Cards, card)
 	table.broadcast(nil, fmt.Sprintf("player %s %s", player.Id, card.Name))
 }
 
+func (table *Table) getDealerCard() {
+	dealerCard := table.Dealer.Hit()
+	table.HouseCards = append(table.HouseCards, dealerCard)
+	table.broadcast(nil, fmt.Sprintf("dealer %s", dealerCard.Name))
+
+}
+
 //end of game
 func (table *Table) process() {
+
+	table.broadcast(nil, "Dealer to play...")
+	//dealer needs to show
+	table.broadcast(nil, fmt.Sprintf("dealer hole %s", table.HouseCards[1].Name))
+
+	var highScore = 0
+
+	for _, playerState := range table.GameState.SeatingOrder {
+		if playerState.State == "Blackjack" {
+			highScore = 21
+		} else if playerState.State == "Stick" && highScore != 21 {
+			total := actor.Validate(playerState.Player.Cards)["Continue"]
+			if total < highScore {
+				highScore = total
+			}
+		}
+	}
+
+	table.processDealer(highScore)
+
+	var dealerTotal = 0
+
+	if table.GameState.DealerState.State == "Blackjack" {
+		dealerTotal = 21
+	} else if table.GameState.DealerState.State == "Stick" {
+		dealerTotal = actor.Validate(table.HouseCards)["Continue"]
+	}
+
+	for _, playerState := range table.GameState.SeatingOrder {
+		table.broadcast(nil, fmt.Sprintf("player %s state %s", playerState.Player.Id, playerState.State))
+	}
+
+	table.broadcast(nil, fmt.Sprintf("dealer state %s", table.GameState.DealerState.State))
+
+	for _, playerState := range table.GameState.SeatingOrder {
+		if playerState.State == "Blackjack" {
+			if dealerTotal != 21 {
+				table.broadcast(nil, fmt.Sprintf("player %s wins", playerState.Player.Id))
+			} else {
+				table.broadcast(nil, fmt.Sprintf("player %s ties", playerState.Player.Id))
+			}
+		} else if playerState.State == "Stick" && highScore != 21 {
+			total := actor.Validate(playerState.Player.Cards)["Continue"]
+			if total == highScore && total > dealerTotal {
+				table.broadcast(nil, fmt.Sprintf("player %s wins", playerState.Player.Id))
+			} else if total == highScore && dealerTotal == total {
+				table.broadcast(nil, fmt.Sprintf("player %s ties", playerState.Player.Id))
+			}
+		}
+	}
+
+	if dealerTotal > highScore {
+		table.broadcast(nil, "dealer wins")
+	}
+
 	table.supervisor.update(false)
 }
 
@@ -39,6 +102,26 @@ func (table *Table) processPlayer(player *actor.Player) {
 		table.broadcast(nil, fmt.Sprintf("player %s is bust", player.Id))
 		table.bust()
 
+	}
+}
+
+func (table *Table) processDealer(highScore int) {
+	switch ProcessCards(table.HouseCards) {
+	case "Blackjack":
+		table.broadcast(nil, "dealer has blackjack")
+		table.GameState.DealerState.State = "Bust"
+	case "Continue":
+		total := actor.Validate(table.HouseCards)["Continue"]
+		if total < highScore {
+			table.getDealerCard()
+			table.processDealer(highScore)
+		} else {
+			//dealer will stick.
+			table.GameState.DealerState.State = "Stick"
+		}
+	case "Bust":
+		table.broadcast(nil, "dealer is is bust")
+		table.GameState.DealerState.State = "Bust"
 	}
 }
 
@@ -96,6 +179,7 @@ func (table *Table) init() {
 			Player: player, State: "Continue"})
 	}
 
+	gameState.DealerState = &PlayerState{}
 	table.GameState = &gameState
 }
 
@@ -108,17 +192,15 @@ func (table *Table) start() {
 	}
 	//first card
 	for _, player := range table.Players {
-		getCard(table, player)
+		table.getCard(player)
 	}
 
 	//dealer card
-	dealerCard := table.Dealer.Hit()
-	table.HouseCards = append(table.HouseCards, dealerCard)
-	table.broadcast(nil, fmt.Sprintf("dealer %s", dealerCard.Name))
+	table.getDealerCard()
 
 	//second cards
 	for _, player := range table.Players {
-		getCard(table, player)
+		table.getCard(player)
 	}
 	//dealer hole card
 	holeCard := table.Dealer.Hit()
@@ -139,6 +221,9 @@ func (gameState *GameState) setNotified(notified bool) {
 }
 
 func (gameState *GameState) getNotified() bool {
+	if gameState.SeatingOrder[gameState.CurrentTurn].State != "Continue" {
+		return true
+	}
 	return gameState.SeatingOrder[gameState.CurrentTurn].Notified
 }
 
@@ -158,7 +243,7 @@ func (table *Table) playerFinished() {
 
 func (table *Table) hit(id string) {
 	var player = table.Players[id]
-	getCard(table, player)
+	table.getCard(player)
 
 	table.processPlayer(player)
 	table.GameState.setNotified(false)
@@ -177,9 +262,6 @@ func (table *Table) blackjack() {
 }
 
 func (table *Table) stick(id string) {
-	var player = table.Players[id]
-	getCard(table, player)
-
 	table.GameState.setPlayerState("Stick")
 	table.GameState.setNotified(false)
 	table.playerFinished()
