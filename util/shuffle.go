@@ -11,9 +11,8 @@ func shufflesplit(cards []*model.Card, c chan []*model.Card) {
 	c <- cards
 }
 
-func SplitAndShuffle(dealer string, cards []*model.Card) []*model.Card {
+func SplitAndShuffle(dealer string, cards []*model.Card, output chan []*model.Card) {
 
-	//fmt.Println(fmt.Sprintf("dealer %s is shuffling", dealer))
 	var shuffled []*model.Card
 	c := make(chan []*model.Card)
 
@@ -27,6 +26,6 @@ func SplitAndShuffle(dealer string, cards []*model.Card) []*model.Card {
 
 	rand.Shuffle(len(shuffled), func(i, j int) { shuffled[i], shuffled[j] = shuffled[j], shuffled[i] })
 
-	return shuffled
+	output <- shuffled
 
 }

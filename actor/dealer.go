@@ -43,14 +43,16 @@ func cutPlacement(decks int) int {
 func (dealer *Dealer) shuffle() {
 
 	var shuffled []*model.Card
+	c := make(chan []*model.Card)
 
-	//needs to be sequential (obviously)
+	//needs to be sequential (obviously)..actually.....
 	for i := 0; i < 100; i++ {
-		shuffled = util.SplitAndShuffle(dealer.Id, dealer.Shoe.Cards)
+		go util.SplitAndShuffle(dealer.Id, dealer.Shoe.Cards, c)
 	}
 
-	//cut
-	//fmt.Println(fmt.Sprintf("cut is %v for dealer %s, shuffled length %v", dealer.Cut, dealer.Id, len(shuffled)))
+	for i := 0; i < 100; i++ {
+		shuffled = append(shuffled, <-c...)
+	}
 
 	dealer.Shoe.Cuts = shuffled[dealer.Cut:]
 	dealer.Shoe.Cards = shuffled[:dealer.Cut]
