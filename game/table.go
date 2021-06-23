@@ -64,13 +64,17 @@ func (table *Table) leave(player *actor.Player) {
 }
 
 func (table *Table) event(message *Message) {
-	switch message.Action {
-	case "hit":
-		table.hit(message.PlayerId)
-	case "stick":
-		table.stick(message.PlayerId)
-	default:
-		//ignore other cases for now. (split etc)
+	if message.PlayerId == table.GameState.currentPlayer().Id {
+		switch message.Action {
+		case "hit":
+			table.hit(message.PlayerId)
+		case "stick":
+			table.stick(message.PlayerId)
+		default:
+			//ignore other cases for now. (split etc)
+		}
+	} else {
+		table.broadcast(table.Players[message.PlayerId], "its not your turn")
 	}
 }
 

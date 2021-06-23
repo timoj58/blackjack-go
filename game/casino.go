@@ -22,7 +22,10 @@ type Message struct {
 }
 
 func (casino *Casino) event(payload *Message) {
-	casino.Tables[payload.Data].event(payload)
+	var table = casino.Tables[payload.Data]
+	if <-table.supervisor.c {
+		table.event(payload)
+	}
 }
 
 func (casino *Casino) join(payload *Message) {

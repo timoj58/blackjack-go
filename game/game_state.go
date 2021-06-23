@@ -38,5 +38,8 @@ func (gameState *GameState) nextPlayer() *actor.Player {
 
 func (gameState *GameState) setPlayerState(state string) {
 	gameState.SeatingOrder[gameState.CurrentTurn].State = state
+}
 
+func (gameState *GameState) currentPlayer() *actor.Player {
+	return gameState.SeatingOrder[gameState.CurrentTurn].Player
 }

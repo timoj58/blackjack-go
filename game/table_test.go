@@ -40,7 +40,7 @@ func TestStart(t *testing.T) {
 	table.join(actor.CreatePlayer(100, channel))
 	table.join(actor.CreatePlayer(100, channel))
 
-	Start(table)
+	table.start()
 
 	//print our the table.....
 	fmt.Print(fmt.Sprintf("dealer cards: %s, ", table.HouseCards[0].Name))
