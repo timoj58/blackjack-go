@@ -94,7 +94,8 @@ func (table *Table) checkFunds() {
 func (table *Table) run() {
 
 	for {
-		inplay := <-table.supervisor.c
+		select {
+		case inplay := <-table.supervisor.c:
 
 		if !inplay && len(table.Players) > 0 {
 
@@ -114,6 +115,7 @@ func (table *Table) run() {
 			//reset incase we have kicked some players out, or they left
 			table.Countdown = 15
 		}
+	}
 
 	}
 

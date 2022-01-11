@@ -17,6 +17,6 @@ func CreateCard(suit string, name string, value int) *Card {
 	return &card
 }
 
-func Ace(suit string) *Card {
+ func Ace(suit string) *Card {
 	return &Card{Suit: suit, Name: fmt.Sprintf("Ace of %s", suit), Value: 11, Visible: true}
 }
