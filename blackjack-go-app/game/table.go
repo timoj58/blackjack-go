@@ -102,13 +102,12 @@ func (table *Table) run() {
 			//make sure the players have the funds...else kick them out.
 			table.checkFunds()
 			if table.Countdown == 0 {
-				table.broadcast(nil, "game starting...")
+				table.broadcast(nil, "{\"type\": \"message\", \"data\": \"game starting...\"}")
 				table.start()
 			} else {
-				time.Sleep(time.Second)
-
-				table.broadcast(nil, fmt.Sprintf("%v seconds till game starts...", table.Countdown))
+				table.broadcast(nil, fmt.Sprintf("{\"type\": \"message\", \"data\": \"%v seconds till game starts...\"}", table.Countdown))
 				table.Countdown -= 1
+				time.Sleep(time.Second)
 			}
 
 		} else if !inplay && len(table.Players) == 0 {

@@ -48,7 +48,6 @@ func (casino *Casino) leave(payload *Message) {
 
 	if !<-table.supervisor.c {
 		table.leave(casino.clients[payload.PlayerId].player)
-		casino.listTables(casino.clients[payload.PlayerId])
 	} else {
 		casino.clients[payload.PlayerId].send <- []byte("table is currently in session")
 	}
@@ -57,9 +56,10 @@ func (casino *Casino) leave(payload *Message) {
 func (casino *Casino) listTables(client *Client) {
 	for _, table := range casino.Tables {
 		if !<-table.supervisor.c {
-			client.send <- []byte(fmt.Sprintf("table %s, cut: %v stake: %v, %v players", table.Id, table.Dealer.Cut, table.Stake, len(table.Players)))
+			client.send <- []byte(fmt.Sprintf("{\"table\": \"%s\", \"cut\": %v, \"stake\": %v,\"players\": %v}", table.Id, table.Dealer.Cut, table.Stake, len(table.Players)))
 		}
 	}
+
 }
 
 func CreateCasino(tables int) *Casino {
@@ -91,8 +91,8 @@ func (casino *Casino) Run() {
 		select {
 		case client := <-casino.register:
 			casino.clients[client.player.Id] = client
-			client.send <- []byte(fmt.Sprintf("Welcome player %s, select a table to join", client.player.Id))
-			casino.listTables(client)
+			client.send <- []byte(fmt.Sprintf("{\"playerId\": \"%s\"}", client.player.Id))
+			//casino.listTables(client)
 		case client := <-casino.unregister:
 			if _, ok := casino.clients[client.player.Id]; ok {
 				delete(casino.clients, client.player.Id)
@@ -116,6 +116,7 @@ func (casino *Casino) Run() {
 		}
 	}
 }
+
 
 // serveWs handles websocket requests from the peer.
 func ServeWs(casino *Casino, w http.ResponseWriter, r *http.Request) {
