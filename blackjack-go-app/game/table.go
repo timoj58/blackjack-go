@@ -27,9 +27,15 @@ func tableStake() int {
 	return stakes[index]
 }
 
+
 func (table *Table) broadcast(sender *actor.Player, message string) {
 	for _, player := range table.Players {
 		if sender == nil || sender.Id == player.Id {
+			defer func() {
+				if err := recover(); err != nil {
+					fmt.Println("panic occurred:", err)
+				}
+			}()  
 			player.Send <- []byte(message)
 		}
 	}
@@ -64,7 +70,7 @@ func (table *Table) join(player *actor.Player) {
 
 func (table *Table) leave(player *actor.Player) {
 	delete(table.Players, player.Id)
-	table.broadcast(player, fmt.Sprintf("player %s has left table", player.Id))
+	table.broadcast(nil, fmt.Sprintf("{\"type\": \"players\",\"data\": \"player %s has left table\", \"id\": \"%s\"}", player.Id, player.Id))
 }
 
 func (table *Table) event(message *Message) {

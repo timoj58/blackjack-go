@@ -6,7 +6,7 @@ function TableTile(props) {
     playerId
   } = props;
   return (
-    <div style={{ borderStyle: 'solid', borderRadius: '10px', padding: '10px', width: '800px' }}>
+    <div style={{ borderStyle: 'solid', borderRadius: '10px', padding: '10px', width: '1200px' }}>
       <div className="row">
         <h1>{table}</h1>
         <div className="column">

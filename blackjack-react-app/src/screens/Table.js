@@ -87,6 +87,11 @@ function Table() {
             cards[p.id] = [];
             setCards(cards);
           });
+        } else if (element.type === 'players') {
+          setMessage(element.data);
+          // remove player from cards
+          delete cards[element.id];
+          setPlayers(players.filter((p) => p.id !== element.id));
         } else if (element.type === 'message' || element.type === 'game') {
           setMessage(element.data);
         } else if (element.type === 'card') {
