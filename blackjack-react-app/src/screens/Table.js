@@ -51,13 +51,27 @@ function Table() {
   };
 
   useEffect(() => {
-    socket.send(
-      JSON.stringify({
-        playerId,
-        action: 'join',
-        data: tableId
-      })
-    );
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(
+        JSON.stringify({
+          playerId,
+          action: 'join',
+          data: tableId
+        })
+      );
+    } else {
+      navigate('/');
+    }
+  }, []);
+
+  useEffect(() => {
+    window.onbeforeunload = function () {
+      return true;
+    };
+
+    return () => {
+      window.onbeforeunload = null;
+    };
   }, []);
 
   useEffect(() => {

@@ -8,22 +8,43 @@ const socket = get();
 function Tables() {
   const location = useLocation();
   const [tables, setTables] = useState([]);
-  const [playerId] = useState(location.state.playerId);
+  const [playerId, setPlayerId] = useState(location.state.playerId);
 
   useEffect(() => {
-    socket.send(
-      JSON.stringify({
-        playerId,
-        action: 'list',
-        data: ''
-      })
-    );
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(
+        JSON.stringify({
+          playerId,
+          action: 'list',
+          data: ''
+        })
+      );
+    }
   }, []);
 
   useEffect(() => {
     socket.onmessage = (event) => {
       const data = event.data.split('\n').map((d) => JSON.parse(d));
-      setTables(tables.concat(data));
+      let addTables = false;
+      let toAdd = [];
+      data.forEach((element) => {
+        if (element.type === 'player') {
+          setPlayerId(JSON.parse(event.data).playerId);
+          socket.send(
+            JSON.stringify({
+              playerId: JSON.parse(event.data).playerId,
+              action: 'list',
+              data: ''
+            })
+          );
+        } else if (element.type === 'tables') {
+          addTables = true;
+          toAdd = toAdd.concat(element);
+        }
+      });
+      if (addTables) {
+        setTables(tables.concat(toAdd));
+      }
     };
   });
 
