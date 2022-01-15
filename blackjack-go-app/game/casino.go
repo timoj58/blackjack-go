@@ -54,10 +54,12 @@ func (casino *Casino) leave(payload *Message) {
 }
 
 func (casino *Casino) listTables(client *Client) {
+	var counter = 1
 	for _, table := range casino.Tables {
-		if !<-table.supervisor.c {
-			client.send <- []byte(fmt.Sprintf("{\"type\": \"tables\", \"table\": \"%s\", \"cut\": %v, \"stake\": %v,\"players\": %v}", table.Id, table.Dealer.Cut, table.Stake, len(table.Players)))
-		}
+	//	if !<-table.supervisor.c {
+			client.send <- []byte(fmt.Sprintf("{\"type\": \"tables\", \"name\": %v,  \"id\": \"%s\", \"status\": %t, \"cut\": %v, \"stake\": %v,\"players\": %v}", counter, table.Id, !<-table.supervisor.c, table.Dealer.Cut, table.Stake, len(table.Players)))
+	//	}
+	counter++
 	}
 
 }

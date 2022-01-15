@@ -8,7 +8,7 @@ import (
 
 
 func main() {
-	c := game.CreateCasino(10)
+	c := game.CreateCasino(9)
 	go c.Run()
 
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {

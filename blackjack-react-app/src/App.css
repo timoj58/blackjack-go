@@ -6,6 +6,16 @@ a {
   color: #FFF;
 }
 
+h1 {
+  font-size: calc(20px + 2vmin);
+}
+
+.grid {
+  display: grid;
+  grid-gap: 1px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
 
 form {
   background-color: #282c34;

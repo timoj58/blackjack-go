@@ -7,7 +7,8 @@ const socket = get();
 
 function Tables() {
   const location = useLocation();
-  const [tables, setTables] = useState([]);
+  const [tables, setTables] = useState({});
+  const [tablesList, setTablesList] = useState([]);
   const [playerId, setPlayerId] = useState(location.state.playerId);
 
   useEffect(() => {
@@ -25,8 +26,6 @@ function Tables() {
   useEffect(() => {
     socket.onmessage = (event) => {
       const data = event.data.split('\n').map((d) => JSON.parse(d));
-      let addTables = false;
-      let toAdd = [];
       data.forEach((element) => {
         if (element.type === 'player') {
           setPlayerId(JSON.parse(event.data).playerId);
@@ -38,25 +37,23 @@ function Tables() {
             })
           );
         } else if (element.type === 'tables') {
-          addTables = true;
-          toAdd = toAdd.concat(element);
+          tables[element.id] = element;
+          setTables(tables);
+          setTablesList(Object.values(tables));
         }
       });
-      if (addTables) {
-        setTables(tables.concat(toAdd));
-      }
     };
   });
 
   return (
     <form>
-      <ul style={{ listStyleType: 'none' }}>
-        {tables.map((d) => (
-          <li style={{ marginBottom: '10px' }} key={d.table}>
+      <div className="grid">
+        {tablesList.map((d) => (
+          <div style={{ margin: '10px' }} key={d.id}>
             <TableTile tableDetails={d} playerId={playerId} />
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </form>
   );
 }
