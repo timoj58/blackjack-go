@@ -86,6 +86,8 @@ func (table *Table) process() {
 	}
 
 	table.supervisor.update(false)
+	//TODO need to broadcast to everyone...not table.
+	table.Casino.globalBroadcast(fmt.Sprintf("{\"type\": \"table-status\", \"status\": true, \"id\": \"%s\"}", table.Id))
 }
 
 func (table *Table) processPlayer(player *actor.Player) {
@@ -160,12 +162,17 @@ func (table *Table) processNatural() {
 			}
 		}
 		table.supervisor.update(false)
-	} else {
+		//TODO need to broadcast to everyone...not table.
+		table.Casino.globalBroadcast(fmt.Sprintf("{\"type\": \"table-status\", \"status\": true, \"id\": \"%s\"}", table.Id))
+		} else {
 		table.broadcast(nil, "{\"type\": \"game\", \"data\": \"please wait for your turn to be called...\"}")
 		time.Sleep(time.Second)
 		table.broadcast(table.GameState.nextPlayer(), "{\"type\": \"game\", \"data\": \"Its your turn!\"}")
 		time.Sleep(time.Second)
 		table.supervisor.update(true)
+		//TODO need to broadcast to everyone...not table.
+		table.Casino.globalBroadcast(fmt.Sprintf("{\"type\": \"table-status\", \"status\": false, \"id\": \"%s\"}", table.Id))
+	
 	}
 }
 

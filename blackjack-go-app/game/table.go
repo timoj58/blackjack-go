@@ -18,6 +18,7 @@ type Table struct {
 	supervisor *TableSupervisor
 	Stake      int
 	GameState  *GameState
+	Casino     *Casino
 }
 
 func tableStake() int {
@@ -41,7 +42,7 @@ func (table *Table) broadcast(sender *actor.Player, message string) {
 	}
 }
 
-func CreateTable(output chan *Table) {
+func CreateTable(output chan *Table, casino *Casino) {
 	rand.Seed(time.Now().UnixNano())
 
 	c := make(chan *actor.Dealer)
@@ -52,6 +53,7 @@ func CreateTable(output chan *Table) {
 		Players:    make(map[string]*actor.Player),
 		Stake:      tableStake(),
 		Countdown:  15,
+		Casino:     casino,
 		supervisor: CreateTableSupervisor(make(chan bool))}
 
 	go table.supervisor.run()

@@ -40,6 +40,10 @@ function Tables() {
           tables[element.id] = element;
           setTables(tables);
           setTablesList(Object.values(tables));
+        } else if (element.type === 'table-status') {
+          tables[element.id].status = element.status;
+          setTables(tables);
+          setTablesList(Object.values(tables));
         }
       });
     };

@@ -21,6 +21,17 @@ type Message struct {
 	Data     string `json:"data"`
 }
 
+func (casino *Casino) globalBroadcast(message string) {
+	for _, client := range casino.clients {
+			defer func() {
+				if err := recover(); err != nil {
+					fmt.Println("panic occurred:", err)
+				}
+			}()  
+			client.send <- []byte(message)
+	}
+}
+
 func (casino *Casino) funds(payload *Message) {
 	var client = casino.clients[payload.PlayerId]
 	client.send <- []byte(fmt.Sprintf("your funds are %v", client.player.Funds))
@@ -76,7 +87,7 @@ func CreateCasino(tables int) *Casino {
 	c := make(chan *Table)
 
 	for i := 0; i < tables; i++ {
-		go CreateTable(c)
+		go CreateTable(c, &casino)
 	}
 
 	for i := 0; i < tables; i++ {
