@@ -20,7 +20,7 @@ jobs:
           password: ${{ secrets.CONTAINER_REGISTRY_PAT }}
       - name: Build and Push Docker Image
         run: docker build -t ghcr.io/timoj58:blackjack-go-app:latest blackjack-go-app/
-       -run: docker push ghcr.io/timoj58:blackjack-go-app:latest
+      - run: docker push ghcr.io/timoj58:blackjack-go-app:latest
 
   deploy-react:
     runs-on: ubuntu-latest
@@ -46,5 +46,5 @@ jobs:
           password: ${{ secrets.CONTAINER_REGISTRY_PAT }}
       - name: Build and Push Docker Image
         run: docker build -t ghcr.io/timoj58:blackjack-react-app:latest blackjack-react-app/
-       -run: docker push ghcr.io/timoj58:blackjack-react-app:latest
+      - run: docker push ghcr.io/timoj58:blackjack-react-app:latest
 
