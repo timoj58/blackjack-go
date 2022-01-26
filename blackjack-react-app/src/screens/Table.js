@@ -65,6 +65,7 @@ function Table() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line func-names
     window.onbeforeunload = function () {
       return true;
     };
