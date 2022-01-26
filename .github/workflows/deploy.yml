@@ -1,0 +1,51 @@
+name: Deploy images
+
+
+on:
+  push:
+     branches: 
+       - master  
+
+jobs:
+  deploy-go:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CONTAINER_REGISTRY_PAT }}
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          dockerfile: blackjack-go-app/Dockerfile
+          push: true # Will only build if this is not here
+          tags: |
+            ghcr.io/${{ github.repository }}-go:${{ github.ref }}
+            ghcr.io/${{ github.repository }}-go:latest
+
+  deploy-react:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v1
+      - name: build locally
+         run: npm run build 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CONTAINER_REGISTRY_PAT }}
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          dockerfile: blackjack-react-app/Dockerfile
+          push: true # Will only build if this is not here
+          tags: |
+            ghcr.io/${{ github.repository }}-react:${{ github.ref }}
+            ghcr.io/${{ github.repository }}-react:latest
+
