@@ -19,13 +19,8 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CONTAINER_REGISTRY_PAT }}
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v1
-        with:
-          dockerfile: blackjack-go-app/Dockerfile
-          push: true # Will only build if this is not here
-          tags: |
-            ghcr.io/${{ github.repository }}-go:${{ github.ref }}
-            ghcr.io/${{ github.repository }}-go:latest
+        run: docker build -t ghcr.io/timoj58:blackjack-go-app:latest blackjack-go-app/
+       -run: docker push ghcr.io/timoj58:blackjack-go-app:latest
 
   deploy-react:
     runs-on: ubuntu-latest
@@ -50,11 +45,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CONTAINER_REGISTRY_PAT }}
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v1
-        with:
-          dockerfile: blackjack-react-app/Dockerfile
-          push: true # Will only build if this is not here
-          tags: |
-            ghcr.io/${{ github.repository }}-react:${{ github.ref }}
-            ghcr.io/${{ github.repository }}-react:latest
+        run: docker build -t ghcr.io/timoj58:blackjack-react-app:latest blackjack-react-app/
+       -run: docker push ghcr.io/timoj58:blackjack-react-app:latest
 
