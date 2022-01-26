@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "blackjack.fullname" . }}
+  name: {{ include "blackjack-chart.fullname" . }}
   labels:
-    {{- include "blackjack.labels" . | nindent 4 }}
+    {{- include "blackjack-chart.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "blackjack.fullname" . }}
+    name: {{ include "blackjack-chart.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

@@ -117,10 +117,10 @@ function Table() {
       <div className="row">
         <p>{message}</p>
         <ul style={{ listStyleType: 'none' }}>
-          <li style={{ marginBottom: '10px' }} key="dealer">
+          <li style={{ margin: '20px' }} key="dealer">
             <Hand title="dealer" cards={dealerCards} />
           </li>
-          <li style={{ marginBottom: '10px' }} key={playerId}>
+          <li style={{ margin: '20px' }} key={playerId}>
             <Hand title="you" cards={playerCards} />
           </li>
           <div style={{ marginTop: '10px', marginBottom: '10px' }}>
@@ -135,7 +135,7 @@ function Table() {
             </button>
           </div>
           {players.map((p) => (
-            <li style={{ marginBottom: '10px' }} key={p.id}>
+            <li style={{ margin: '20px' }} key={p.id}>
               <Hand title={p.id} cards={cards[p.id]} />
             </li>
           ))}
