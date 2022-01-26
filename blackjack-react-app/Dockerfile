@@ -1,3 +1,4 @@
 FROM nginx
 
-COPY build /usr/share/nginx/html
+COPY blackjack-react-app/container /
+COPY blackjack-react-app/build /usr/share/nginx/html
